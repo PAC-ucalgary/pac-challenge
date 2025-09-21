@@ -107,4 +107,179 @@
       <div class="links">
         <a class="btn" id="docLink" target="_blank" rel="noopener">Challenge Doc</a>
         <!-- This button now scrolls to the full leaderboard section -->
-        <a
+        <a class="btn" id="fullBtn" href="#full-leaderboard">View Full Leaderboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+      <!-- Left: House leaderboard -->
+      <div class="card">
+        <h1>House Leaderboard</h1>
+        <p class="small muted">
+          Live standings for the four houses. Keep completing challenges to push your team up the board.
+        </p>
+        <div class="row" id="houseStats"></div>
+        <table id="houseTable" style="margin-top:12px">
+          <thead>
+            <tr><th>Rank</th><th>House</th><th>Captain</th><th>Total Points</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="houseError" class="error small"></div>
+      </div>
+
+      <!-- Right: Top 5 Individuals -->
+      <div class="card">
+        <h2>Top 5 Individuals</h2>
+        <p class="small muted">Live ranking of volunteers based on approved points.</p>
+        <table id="top5Table">
+          <thead>
+            <tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="indTopError" class="error small"></div>
+      </div>
+    </section>
+
+    <!-- Constant challenges -->
+    <section class="card" style="margin-top:20px">
+      <h2>Constant Challenges (All Semester)</h2>
+      <div class="challenge-grid">
+        <div class="challenge"><div class="left"><div class="title">Wear pro-Palestinian attire</div><div class="sub">Keffiyeh, shirt, wristband…</div></div><div class="pts">5 / day</div></div>
+        <div class="challenge"><div class="left"><div class="title">Hand out flyers</div><div class="sub">Grab flyers from locker</div></div><div class="pts">1 / flyer</div></div>
+        <div class="challenge"><div class="left"><div class="title">Print flyers</div><div class="sub">Return to locker neatly</div></div><div class="pts">1 / 3 flyers</div></div>
+        <div class="challenge"><div class="left"><div class="title">Posters/Flags on bulletin boards</div><div class="sub">Stapler in locker</div></div><div class="pts">1 each</div></div>
+        <div class="challenge"><div class="left"><div class="title">Design / print a poster</div><div class="sub">Catchy fact or statement</div></div><div class="pts">1 each</div></div>
+        <div class="challenge"><div class="left"><div class="title">Chalk writing</div><div class="sub">Facts, education focus</div></div><div class="pts">7 each</div></div>
+        <div class="challenge"><div class="left"><div class="title">Chalk removed bonus</div><div class="sub">If erased by uni/others</div></div><div class="pts">+10</div></div>
+        <div class="challenge"><div class="left"><div class="title">Post-it note messages</div><div class="sub">Mirrors, cubicles, elevators…</div></div><div class="pts">2 each</div></div>
+        <div class="challenge"><div class="left"><div class="title">Whiteboard/blackboard messages</div><div class="sub">Use clear, factual language</div></div><div class="pts">10 each</div></div>
+        <div class="challenge"><div class="left"><div class="title">Make a meme</div><div class="sub">+3 per 100 story impressions</div></div><div class="pts">5</div></div>
+        <div class="challenge"><div class="left"><div class="title">UCalgary Subreddit post</div><div class="sub">+2 if taken down</div></div><div class="pts tight">5 / 1k views</div></div>
+        <div class="challenge"><div class="left"><div class="title">Read an educational book</div><div class="sub">From the approved list</div></div><div class="pts tight">10 / 100 pages</div></div>
+        <div class="challenge"><div class="left"><div class="title">Comment on a PAC post</div><div class="sub">Within 24 hours</div></div><div class="pts">3</div></div>
+        <div class="challenge"><div class="left"><div class="title">Attend a workshop</div><div class="sub">Verified attendance</div></div><div class="pts">15</div></div>
+        <div class="challenge"><div class="left"><div class="title">Refer a friend to volunteer</div><div class="sub">Add them to the GC</div></div><div class="pts">5 / person</div></div>
+      </div>
+    </section>
+
+    <!-- Full Individual Leaderboard -->
+    <section class="card" id="full-leaderboard" style="margin-top:20px">
+      <h2>Individual Leaderboard (Full)</h2>
+      <table id="indivTable">
+        <thead>
+          <tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="indError" class="error small"></div>
+    </section>
+  </main>
+
+  <footer>
+    Built for PAC by your team • Refreshes automatically • Privacy-safe (read-only)
+  </footer>
+
+  <script>
+    // ===== CONFIG: set your links here =====
+    const CONFIG = {
+      houseCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=0&single=true&output=csv",
+      individualCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=200435731&single=true&output=csv",
+      challengeDocURL: "https://docs.google.com/document/d/1j3UUIg44EYJbwhgLaZoyTG-nD0Af_nuqWdvY7mDyT7g/edit?usp=sharing"
+    };
+
+    // House → Captain mapping
+    const CAPTAINS = { "Quds":"Mohammad Eldib", "Gaza":"Ghassan Abuamsha", "Qalqilya":"Nour Issa", "Besan":"Besan Jadalowen" };
+
+    // Header buttons
+    document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
+    // Smooth scroll fallback:
+    document.getElementById('fullBtn').addEventListener('click', (e)=>{
+      const el = document.querySelector('#full-leaderboard');
+      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+
+    // --- helpers ---
+    async function fetchCSV(url){
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.text();
+    }
+    function parseCSV(t){ return t.trim().split(/\r?\n/).map(r => r.split(',')); }
+    function formatNumber(n){ const x = Number(n); return isFinite(x) ? x.toLocaleString() : n; }
+
+    // --- houses ---
+    function renderHouses(rows){
+      const tbody = document.querySelector('#houseTable tbody');
+      const stats = document.getElementById('houseStats');
+      tbody.innerHTML = ''; stats.innerHTML = '';
+      const data = rows.slice(1).map(r => ({house:r[0], points:+r[1]||0})).sort((a,b)=>b.points-a.points);
+
+      data.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="rank">${i+1}</td>
+          <td><span class="house-pill">${r.house}</span></td>
+          <td>${CAPTAINS[r.house] || "—"}</td>
+          <td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      data.slice(0,3).forEach((r,i)=>{
+        const d = document.createElement('div'); d.className='stat';
+        d.innerHTML = `<div class="small muted">#${i+1} House</div>
+                       <div style="font-weight:800; font-size:1.1rem">${r.house}</div>
+                       <div class="small muted">${formatNumber(r.points)} pts • Captain: ${CAPTAINS[r.house] || "—"}</div>`;
+        stats.appendChild(d);
+      });
+    }
+
+    // --- individuals ---
+    function renderTop5(rows){
+      const tbody = document.querySelector('#top5Table tbody');
+      tbody.innerHTML = '';
+      if(!rows.length) return;
+      const data = rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
+        .sort((a,b)=>b.points-a.points).slice(0,5);
+      data.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    function renderIndividuals(rows){
+      const tbody = document.querySelector('#indivTable tbody');
+      tbody.innerHTML = '';
+      if(!rows.length) return;
+      const data = rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
+        .sort((a,b)=>b.points-a.points);
+      data.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function load(){
+      try{
+        const houseText = await fetchCSV(CONFIG.houseCSV);
+        renderHouses(parseCSV(houseText));
+
+        const indivText = await fetchCSV(CONFIG.individualCSV);
+        const rows = parseCSV(indivText);
+        renderTop5(rows);
+        renderIndividuals(rows);
+      }catch(err){
+        document.getElementById('houseError').textContent = 'House data error: ' + err.message;
+        document.getElementById('indError').textContent = 'Individual data error: ' + err.message;
+        document.getElementById('indTopError').textContent = 'Individual data error: ' + err.message;
+      }
+    }
+    load();
+    setInterval(load, 60000);
+  </script>
+</body>
+</html>
