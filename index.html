@@ -1,1 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PAC Volunteer Challenge – Live Leaderboard</title>
+  <meta name="description" content="Live house rankings and top volunteers for the PAC Volunteer Challenge." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{ --bg:#0b0f14; --panel:#111823; --text:#e8eef5; --muted:#a7b3c2; --brand:#4cc9f0; --brand2:#a3f7bf; --shadow:0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.03) inset; }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:radial-gradient(1200px 600px at 80% -10%, rgba(76,201,240,.15), transparent 60%), radial-gradient(800px 400px at -10% 10%, rgba(163,247,191,.12), transparent 60%), var(--bg); color:var(--text)}
+    a{color:inherit; text-decoration:none}
+    .container{width:min(1100px,92%); margin-inline:auto}
+    header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(150%) blur(8px); background:linear-gradient(180deg, rgba(11,15,20,.85), rgba(11,15,20,.55)); border-bottom:1px solid rgba(255,255,255,.06)}
+    .nav{display:flex; align-items:center; justify-content:space-between; padding:.9rem 0}
+    .nav .logo{font-weight:800; letter-spacing:.3px}
+    .nav .links{display:flex; gap:1rem}
+    .chip{display:inline-block; padding:.3rem .6rem; border-radius:999px; font-size:.75rem; color:#06121a; background:linear-gradient(110deg, var(--brand2), #7fe9d0)}
+    .btn{display:inline-flex; align-items:center; gap:.6rem; padding:.75rem 1rem; border-radius:14px; background:linear-gradient(180deg, var(--brand), #2ea9ce); color:#041018; font-weight:700; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.06)}
+    .btn.secondary{background:transparent; color:var(--text); border:1px solid rgba(167,179,194,.25)}
+    main{padding:32px 0 64px}
+    .grid{display:grid; gap:20px}
+    @media(min-width:900px){.grid{grid-template-columns:1.1fr .9fr}}
+    .card{background:var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:22px; padding:20px; box-shadow:var(--shadow)}
+    h1{font-size:clamp(28px, 3vw, 40px); margin:.2rem 0 1rem}
+    h2{font-size:clamp(18px, 2.2vw, 24px); margin:.2rem 0 1rem}
+    p{color:var(--muted)}
+    table{width:100%; border-collapse:collapse; font-size:.95rem}
+    th, td{padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.06); text-align:left}
+    th{color:#cfe3f7}
+    tr:hover td{background:rgba(255,255,255,.03)}
+    .rank{font-weight:800}
+    .house-pill{display:inline-flex; align-items:center; gap:.5rem; padding:.3rem .6rem; border-radius:999px; background:rgba(76,201,240,.12); border:1px solid rgba(76,201,240,.3)}
+    .muted{color:var(--muted)}
+    .small{font-size:.85rem}
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .stat{flex:1 1 140px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px}
+    footer{padding:24px 0 48px; color:var(--muted); text-align:center}
+    .error{color:#ffb4b4}
+    code.inline{background:rgba(255,255,255,.08); padding:.2rem .35rem; border-radius:6px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="logo">PAC Challenge <span class="chip">Live</span></div>
+      <div class="links">
+        <a class="btn secondary" id="formLink" target="_blank" rel="noopener">Submit Proof</a>
+        <a class="btn" id="sheetLink" target="_blank" rel="noopener">View Full Board</a>
+      </div>
+    </div>
+  </header>
 
+  <main class="container">
+    <section class="grid">
+      <div class="card">
+        <h1>House Leaderboard</h1>
+        <p class="small muted">Auto-refreshes every 60s. Data comes from your Google Sheet (published as CSV). Replace the URLs in the <code class="inline">CONFIG</code> object below.
+        </p>
+        <div class="row" id="houseStats"></div>
+        <table id="houseTable" style="margin-top:12px">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>House</th>
+              <th>Total Points</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="houseError" class="error small"></div>
+      </div>
+
+      <div class="card">
+        <h2>Top Volunteers</h2>
+        <p class="small muted">Shows individual standings (Approved points only).</p>
+        <table id="volTable">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Name</th>
+              <th>House</th>
+              <th>Points</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="volError" class="error small"></div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:20px">
+      <h2>How it works</h2>
+      <ol class="small">
+        <li>Create a Google Sheet tab named <strong>HouseLeaderboard</strong> with exactly two columns: <code>House, Points</code>. Put your four houses on rows 2–5 and type the running total points manually.</li>
+        <li>File → Share → <em>Publish to web</em> → pick the <strong>HouseLeaderboard</strong> tab → format <strong>CSV</strong>. Copy the link.</li>
+        <li>Paste that CSV link into <code class="inline">CONFIG.houseCSV</code> below. Leave <code class="inline">volCSV</code> empty—the Top Volunteers card will hide automatically.</li>
+      </ol>
+      <p class="small muted">You can add individual tracking later by creating a <strong>TopVolunteers</strong> tab and setting <code class="inline">CONFIG.volCSV</code>.</p>
+  </main>
+
+  <footer>
+    Built for PAC by your team • Refreshes automatically • Privacy-safe (read-only)
+  </footer>
+
+  <script>
+    // === CONFIG: replace these with your published CSV URLs ===
+    const CONFIG = {
+      // REQUIRED: a single CSV with two columns: House, Points (header row included)
+      houseCSV: "https://docs.google.com/spreadsheets/d/https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=0&single=true&output=csv/pub?gid=0&single=true&output=csv",
+      // OPTIONAL: if you later track individuals, add a TopVolunteers CSV; leave empty to hide table
+      volCSV:   "",
+      submitFormURL: "", // or '' to hide button text
+      sheetURL: ""
+    };
+
+    // Button links
+    document.getElementById('formLink').href = CONFIG.submitFormURL;
+    document.getElementById('sheetLink').href = CONFIG.sheetURL;
+
+    async function fetchCSV(url){
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.text();
+    }
+
+    function parseCSV(text){
+      // Simple CSV parser (no commas inside quotes). Keep your aggregated tabs simple.
+      return text.trim().split(/\r?\n/).map(r => r.split(','));
+    }
+
+    function formatNumber(n){
+      const x = Number(n); return isFinite(x) ? x.toLocaleString() : n;
+    }
+
+    function renderHouses(rows){
+      // Expect header: House, Points
+      const tbody = document.querySelector('#houseTable tbody');
+      const stats = document.getElementById('houseStats');
+      tbody.innerHTML = ''; stats.innerHTML = '';
+      const data = rows.slice(1).map(r => ({house:r[0], points:+r[1]||0})).sort((a,b)=>b.points-a.points);
+      data.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="rank">${i+1}</td><td><span class="house-pill">${r.house}</span></td><td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+      data.slice(0,3).forEach((r,i)=>{
+        const d = document.createElement('div');
+        d.className = 'stat';
+        d.innerHTML = `<div class="small muted">#${i+1} House</div><div style="font-weight:800; font-size:1.1rem">${r.house}</div><div class="small muted">${formatNumber(r.points)} pts</div>`;
+        stats.appendChild(d);
+      });
+    }
+
+    function renderVolunteers(rows){
+      // If volCSV is empty, hide the Top Volunteers card gracefully
+      if(!CONFIG.volCSV){
+        const card = document.querySelector('#volTable')?.closest('.card');
+        if(card) card.style.display = 'none';
+        return;
+      }
+      const tbody = document.querySelector('#volTable tbody');
+      tbody.innerHTML = '';
+      const data = rows.slice(1).map(r => ({name:r[0], house:r[1], points:+r[2]||0})).sort((a,b)=>b.points-a.points);
+      data.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${(r.points).toLocaleString()}</td>`;
+        tbody.appendChild(tr);
+      });
+    })).sort((a,b)=>b.points-a.points);
+      data.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function load(){
+      try{
+        const houseText = await fetchCSV(CONFIG.houseCSV);
+        renderHouses(parseCSV(houseText));
+        if(CONFIG.volCSV){
+          const volText = await fetchCSV(CONFIG.volCSV);
+          renderVolunteers(parseCSV(volText));
+        } else {
+          renderVolunteers([]);
+        }
+      }catch(err){
+        document.getElementById('houseError').textContent = 'House data error: ' + err.message;
+        document.getElementById('volError').textContent = 'Volunteer data error: ' + err.message;
+      }
+    }
+
+    load();
+    setInterval(load, 60000); // refresh every 60s
+  </script>
+</body>
+</html>
