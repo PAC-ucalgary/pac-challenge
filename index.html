@@ -8,41 +8,73 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
   <style>
-    :root{ --bg:#0b0f14; --panel:#111823; --text:#e8eef5; --muted:#a7b3c2; --brand:#4cc9f0; --brand2:#a3f7bf; --shadow:0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.03) inset; }
+    :root{
+      --bg:#0b0f14; --panel:#111823; --text:#e8eef5; --muted:#a7b3c2;
+      --brand:#4cc9f0; --brand2:#a3f7bf; --ring:rgba(76,201,240,.35);
+      --shadow:0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.03) inset;
+    }
     *{box-sizing:border-box}
-    body{margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:radial-gradient(1200px 600px at 80% -10%, rgba(76,201,240,.15), transparent 60%), radial-gradient(800px 400px at -10% 10%, rgba(163,247,191,.12), transparent 60%), var(--bg); color:var(--text)}
+    body{
+      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background: radial-gradient(1200px 600px at 80% -10%, rgba(76,201,240,.15), transparent 60%),
+                  radial-gradient(800px 400px at -10% 10%, rgba(163,247,191,.12), transparent 60%),
+                  var(--bg);
+      color:var(--text)
+    }
     a{color:inherit; text-decoration:none}
     .container{width:min(1100px,92%); margin-inline:auto}
-    header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(150%) blur(8px); background:linear-gradient(180deg, rgba(11,15,20,.85), rgba(11,15,20,.55)); border-bottom:1px solid rgba(255,255,255,.06)}
+    header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(150%) blur(8px);
+      background:linear-gradient(180deg, rgba(11,15,20,.85), rgba(11,15,20,.55));
+      border-bottom:1px solid rgba(255,255,255,.06)}
     .nav{display:flex; align-items:center; justify-content:space-between; padding:.9rem 0}
-    .nav .logo{font-weight:800; letter-spacing:.3px}
-    .nav .links{display:flex; gap:1rem}
-    .chip{display:inline-block; padding:.3rem .6rem; border-radius:999px; font-size:.75rem; color:#06121a; background:linear-gradient(110deg, var(--brand2), #7fe9d0)}
-    .btn{display:inline-flex; align-items:center; gap:.6rem; padding:.75rem 1rem; border-radius:14px; background:linear-gradient(180deg, var(--brand), #2ea9ce); color:#041018; font-weight:700; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.06)}
+    .logo{font-weight:800; letter-spacing:.3px}
+    .chip{display:inline-block; padding:.3rem .6rem; border-radius:999px; font-size:.75rem;
+      color:#06121a; background:linear-gradient(110deg, var(--brand2), #7fe9d0)}
+    .links{display:flex; gap:1rem}
+    .btn{display:inline-flex; align-items:center; gap:.6rem; padding:.75rem 1rem; border-radius:14px;
+      background:linear-gradient(180deg, var(--brand), #2ea9ce); color:#041018; font-weight:700;
+      box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.06)}
     .btn.secondary{background:transparent; color:var(--text); border:1px solid rgba(167,179,194,.25)}
     main{padding:32px 0 64px}
     .grid{display:grid; gap:20px}
-    @media(min-width:900px){.grid{grid-template-columns:1.1fr .9fr}}
+    @media(min-width:900px){ .grid{grid-template-columns:1.1fr .9fr} }
     .card{background:var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:22px; padding:20px; box-shadow:var(--shadow)}
-    h1{font-size:clamp(28px, 3vw, 40px); margin:.2rem 0 1rem}
-    h2{font-size:clamp(18px, 2.2vw, 24px); margin:.2rem 0 1rem}
+    h1{font-size:clamp(28px,3vw,40px); margin:.2rem 0 1rem}
+    h2{font-size:clamp(18px,2.2vw,24px); margin:.2rem 0 1rem}
     p{color:var(--muted)}
     table{width:100%; border-collapse:collapse; font-size:.95rem}
     th, td{padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.06); text-align:left}
     th{color:#cfe3f7}
     tr:hover td{background:rgba(255,255,255,.03)}
     .rank{font-weight:800}
-    .house-pill{display:inline-flex; align-items:center; gap:.5rem; padding:.3rem .6rem; border-radius:999px; background:rgba(76,201,240,.12); border:1px solid rgba(76,201,240,.3)}
-    .muted{color:var(--muted)}
-    .small{font-size:.85rem}
+    .house-pill{display:inline-flex; align-items:center; gap:.5rem; padding:.3rem .6rem; border-radius:999px;
+      background:rgba(76,201,240,.12); border:1px solid rgba(76,201,240,.3)}
+    .muted{color:var(--muted)} .small{font-size:.85rem}
     .row{display:flex; gap:12px; flex-wrap:wrap}
-    .stat{flex:1 1 140px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px}
+    .stat{flex:1 1 140px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+      border-radius:16px; padding:14px}
     footer{padding:24px 0 48px; color:var(--muted); text-align:center}
     .error{color:#ffb4b4}
     code.inline{background:rgba(255,255,255,.08); padding:.2rem .35rem; border-radius:6px}
-    .list{margin:0; padding-left:18px}
-    .list li{margin:.3rem 0}
+
+    /* Challenge cards */
+    .challenge-grid{
+      display:grid; gap:12px; grid-template-columns:repeat(1,minmax(0,1fr));
+    }
+    @media(min-width:700px){ .challenge-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+    @media(min-width:1000px){ .challenge-grid{grid-template-columns:repeat(3,minmax(0,1fr));} }
+    .challenge{
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+      border-radius:16px; padding:14px; display:flex; align-items:flex-start; gap:12px
+    }
+    .pts{
+      margin-left:auto; font-weight:800; padding:.25rem .6rem; border-radius:999px;
+      background:rgba(76,201,240,.15); border:1px solid rgba(76,201,240,.35)
+    }
+    .title{font-weight:700}
+    .sub{font-size:.85rem; color:var(--muted); margin-top:2px}
   </style>
 </head>
 <body>
@@ -50,7 +82,6 @@
     <div class="container nav">
       <div class="logo">PAC Challenge <span class="chip">Live</span></div>
       <div class="links">
-        <!-- Removed Submit Proof button -->
         <a class="btn" id="docLink" target="_blank" rel="noopener">Challenge Doc</a>
         <a class="btn" id="sheetLink" target="_blank" rel="noopener">View Full Board</a>
       </div>
@@ -59,6 +90,7 @@
 
   <main class="container">
     <section class="grid">
+      <!-- Left: House leaderboard -->
       <div class="card">
         <h1>House Leaderboard</h1>
         <p class="small muted">
@@ -68,56 +100,59 @@
         <div class="row" id="houseStats"></div>
         <table id="houseTable" style="margin-top:12px">
           <thead>
-            <tr>
-              <th>Rank</th>
-              <th>House</th>
-              <th>Total Points</th>
-            </tr>
+            <tr><th>Rank</th><th>House</th><th>Total Points</th></tr>
           </thead>
           <tbody></tbody>
         </table>
         <div id="houseError" class="error small"></div>
       </div>
 
+      <!-- Right: Top 5 Individuals -->
       <div class="card">
-        <h2>Top Volunteers</h2>
-        <p class="small muted">Shows individual standings (Approved points only).</p>
-        <table id="volTable">
+        <h2>Top 5 Individuals</h2>
+        <p class="small muted">Live ranking of volunteers based on approved points.</p>
+        <table id="top5Table">
           <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Name</th>
-              <th>House</th>
-              <th>Points</th>
-            </tr>
+            <tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr>
           </thead>
           <tbody></tbody>
         </table>
-        <div id="volError" class="error small"></div>
+        <div id="indTopError" class="error small"></div>
       </div>
     </section>
 
+    <!-- Constant challenges -->
     <section class="card" style="margin-top:20px">
       <h2>Constant Challenges (All Semester)</h2>
-      <ul class="list small">
-        <li><strong>Wear pro-Palestinian attire:</strong> 5 pts/day</li>
-        <li><strong>Hand out flyers:</strong> 1 pt per flyer</li>
-        <li><strong>Print flyers:</strong> 1 pt per 3 flyers printed</li>
-        <li><strong>Posters/Flags on bulletin boards:</strong> 1 pt each</li>
-        <li><strong>Design/print a poster:</strong> 1 pt per printed poster</li>
-        <li><strong>Chalk writing:</strong> 7 pts per statement (+10 if it gets erased)</li>
-        <li><strong>Post-it note messages:</strong> 2 pts each</li>
-        <li><strong>Whiteboard/blackboard messages:</strong> 10 pts each</li>
-        <li><strong>Make a meme:</strong> 5 pts (+3 per 100 story impressions)</li>
-        <li><strong>UCalgary Subreddit post:</strong> 5 pts per 1k views (+2 if taken down)</li>
-        <li><strong>Read an educational book:</strong> 10 pts per 100 pages</li>
-        <li><strong>Comment on a PAC post within 24h:</strong> 3 pts</li>
-        <li><strong>Attend a workshop:</strong> 15 pts</li>
-        <li><strong>Refer a friend to volunteer:</strong> 5 pts per person</li>
-      </ul>
-      <p class="small muted" style="margin-top:10px">
-        Weekly & urgent challenges are announced in the group chat and the doc.
-      </p>
+      <div class="challenge-grid">
+        <div class="challenge"><div><div class="title">Wear pro-Palestinian attire</div><div class="sub">Keffiyeh, shirt, wristband…</div></div><div class="pts">5 / day</div></div>
+        <div class="challenge"><div><div class="title">Hand out flyers</div><div class="sub">Grab flyers from locker</div></div><div class="pts">1 / flyer</div></div>
+        <div class="challenge"><div><div class="title">Print flyers</div><div class="sub">Return to locker neatly</div></div><div class="pts">1 / 3 flyers</div></div>
+        <div class="challenge"><div><div class="title">Posters/Flags on bulletin boards</div><div class="sub">Stapler in locker</div></div><div class="pts">1 each</div></div>
+        <div class="challenge"><div><div class="title">Design / print a poster</div><div class="sub">Catchy fact or statement</div></div><div class="pts">1 each</div></div>
+        <div class="challenge"><div><div class="title">Chalk writing</div><div class="sub">Facts, education focus</div></div><div class="pts">7 each</div></div>
+        <div class="challenge"><div><div class="title">Chalk removed bonus</div><div class="sub">If erased by uni/others</div></div><div class="pts">+10</div></div>
+        <div class="challenge"><div><div class="title">Post-it note messages</div><div class="sub">Mirrors, cubicles, elevators…</div></div><div class="pts">2 each</div></div>
+        <div class="challenge"><div><div class="title">Whiteboard/blackboard messages</div><div class="sub">Use clear, factual language</div></div><div class="pts">10 each</div></div>
+        <div class="challenge"><div><div class="title">Make a meme</div><div class="sub">+3 per 100 story impressions</div></div><div class="pts">5</div></div>
+        <div class="challenge"><div><div class="title">UCalgary Subreddit post</div><div class="sub">+2 if taken down</div></div><div class="pts">5 / 1k views</div></div>
+        <div class="challenge"><div><div class="title">Read an educational book</div><div class="sub">From the approved list</div></div><div class="pts">10 / 100 pages</div></div>
+        <div class="challenge"><div><div class="title">Comment on a PAC post</div><div class="sub">Within 24 hours</div></div><div class="pts">3</div></div>
+        <div class="challenge"><div><div class="title">Attend a workshop</div><div class="sub">Verified attendance</div></div><div class="pts">15</div></div>
+        <div class="challenge"><div><div class="title">Refer a friend to volunteer</div><div class="sub">Add them to the GC</div></div><div class="pts">5 / person</div></div>
+      </div>
+    </section>
+
+    <!-- Full Individual Leaderboard -->
+    <section class="card" style="margin-top:20px">
+      <h2>Individual Leaderboard (Full)</h2>
+      <table id="indivTable">
+        <thead>
+          <tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="indError" class="error small"></div>
     </section>
   </main>
 
@@ -126,35 +161,31 @@
   </footer>
 
   <script>
-    // === CONFIG: replace these with your links ===
+    // ===== CONFIG: set your links here =====
     const CONFIG = {
-      // Your publish-to-web CSV link (must end with output=csv)
+      // 1) House leaderboard CSV (House,Points)
       houseCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=0&single=true&output=csv",
-      // Leave empty to hide the Top Volunteers card
-      volCSV: "",
+      // 2) Individual leaderboard CSV (Name,House,Points)
+      individualCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=200435731&single=true&output=csv",
       // Buttons
-      challengeDocURL: "PASTE_GOOGLE_DOC_LINK_HERE",
-      sheetURL: ""
+      challengeDocURL: "https://docs.google.com/document/d/1j3UUIg44EYJbwhgLaZoyTG-nD0Af_nuqWdvY7mDyT7g/edit?usp=sharing",
+      sheetURL: "" // optional view-only sheet link
     };
 
-    // Button links
+    // Buttons
     document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
     document.getElementById('sheetLink').href = CONFIG.sheetURL || "#";
 
+    // Helpers
     async function fetchCSV(url){
       const res = await fetch(url, {cache:'no-store'});
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.text();
     }
+    function parseCSV(text){ return text.trim().split(/\r?\n/).map(r => r.split(',')); }
+    function formatNumber(n){ const x = Number(n); return isFinite(x) ? x.toLocaleString() : n; }
 
-    function parseCSV(text){
-      return text.trim().split(/\r?\n/).map(r => r.split(','));
-    }
-
-    function formatNumber(n){
-      const x = Number(n); return isFinite(x) ? x.toLocaleString() : n;
-    }
-
+    // Houses
     function renderHouses(rows){
       const tbody = document.querySelector('#houseTable tbody');
       const stats = document.getElementById('houseStats');
@@ -171,21 +202,34 @@
       data.slice(0,3).forEach((r,i)=>{
         const d = document.createElement('div');
         d.className = 'stat';
-        d.innerHTML = `<div class="small muted">#${i+1} House</div><div style="font-weight:800; font-size:1.1rem">${r.house}</div><div class="small muted">${formatNumber(r.points)} pts</div>`;
+        d.innerHTML = `<div class="small muted">#${i+1} House</div>
+                       <div style="font-weight:800; font-size:1.1rem">${r.house}</div>
+                       <div class="small muted">${formatNumber(r.points)} pts</div>`;
         stats.appendChild(d);
       });
     }
 
-    function renderVolunteers(rows){
-      // Hide the card if volCSV isn't provided
-      if(!CONFIG.volCSV){
-        const card = document.querySelector('#volTable')?.closest('.card');
-        if(card) card.style.display = 'none';
-        return;
-      }
-      const tbody = document.querySelector('#volTable tbody');
+    // Individuals: Top 5 (right card)
+    function renderTop5(rows){
+      const tbody = document.querySelector('#top5Table tbody');
       tbody.innerHTML = '';
-      const data = rows.slice(1).map(r => ({name:r[0], house:r[1], points:+r[2]||0})).sort((a,b)=>b.points-a.points);
+      if(!rows.length){ return; }
+      const data = rows.slice(1).map(r => ({name:r[0], house:r[1], points:+r[2]||0}))
+                        .sort((a,b)=>b.points-a.points).slice(0,5);
+      data.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Individuals: Full table (bottom card)
+    function renderIndividuals(rows){
+      const tbody = document.querySelector('#indivTable tbody');
+      tbody.innerHTML = '';
+      if(!rows.length){ return; }
+      const data = rows.slice(1).map(r => ({name:r[0], house:r[1], points:+r[2]||0}))
+                        .sort((a,b)=>b.points-a.points);
       data.forEach((r,i)=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
@@ -195,17 +239,20 @@
 
     async function load(){
       try{
+        // Houses
         const houseText = await fetchCSV(CONFIG.houseCSV);
         renderHouses(parseCSV(houseText));
-        if(CONFIG.volCSV){
-          const volText = await fetchCSV(CONFIG.volCSV);
-          renderVolunteers(parseCSV(volText));
-        } else {
-          renderVolunteers([]);
-        }
+
+        // Individuals (top 5 + full)
+        const indivText = await fetchCSV(CONFIG.individualCSV);
+        const rows = parseCSV(indivText);
+        renderTop5(rows);
+        renderIndividuals(rows);
+
       }catch(err){
         document.getElementById('houseError').textContent = 'House data error: ' + err.message;
-        document.getElementById('volError').textContent = 'Volunteer data error: ' + err.message;
+        document.getElementById('indError').textContent = 'Individual data error: ' + err.message;
+        document.getElementById('indTopError').textContent = 'Individual data error: ' + err.message;
       }
     }
 
