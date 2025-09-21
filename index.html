@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PAC Volunteer Challenge – Live Leaderboard</title>
-  <meta name="description" content="Live house rankings and top volunteers for the PAC Volunteer Challenge." />
+  <meta name="description" content="Live house rankings and challenge info for the PAC Volunteer Challenge." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -41,6 +41,8 @@
     footer{padding:24px 0 48px; color:var(--muted); text-align:center}
     .error{color:#ffb4b4}
     code.inline{background:rgba(255,255,255,.08); padding:.2rem .35rem; border-radius:6px}
+    .list{margin:0; padding-left:18px}
+    .list li{margin:.3rem 0}
   </style>
 </head>
 <body>
@@ -48,7 +50,8 @@
     <div class="container nav">
       <div class="logo">PAC Challenge <span class="chip">Live</span></div>
       <div class="links">
-        <a class="btn secondary" id="formLink" target="_blank" rel="noopener">Submit Proof</a>
+        <!-- Removed Submit Proof button -->
+        <a class="btn" id="docLink" target="_blank" rel="noopener">Challenge Doc</a>
         <a class="btn" id="sheetLink" target="_blank" rel="noopener">View Full Board</a>
       </div>
     </div>
@@ -58,7 +61,9 @@
     <section class="grid">
       <div class="card">
         <h1>House Leaderboard</h1>
-        <p class="small muted">Auto-refreshes every 60s. Data comes from your Google Sheet (published as CSV). Replace the URLs in the <code class="inline">CONFIG</code> object below.
+        <p class="small muted">
+          Live standings for the four houses. Keep completing challenges to push your team up the board.
+          Scores refresh every 60s from the PAC sheet.
         </p>
         <div class="row" id="houseStats"></div>
         <table id="houseTable" style="margin-top:12px">
@@ -93,13 +98,27 @@
     </section>
 
     <section class="card" style="margin-top:20px">
-      <h2>How it works</h2>
-      <ol class="small">
-        <li>Create a Google Sheet tab named <strong>HouseLeaderboard</strong> with exactly two columns: <code>House, Points</code>. Put your four houses on rows 2–5 and type the running total points manually.</li>
-        <li>File → Share → <em>Publish to web</em> → pick the <strong>HouseLeaderboard</strong> tab → format <strong>CSV</strong>. Copy the link.</li>
-        <li>Paste that CSV link into <code class="inline">CONFIG.houseCSV</code> below. Leave <code class="inline">volCSV</code> empty—the Top Volunteers card will hide automatically.</li>
-      </ol>
-      <p class="small muted">You can add individual tracking later by creating a <strong>TopVolunteers</strong> tab and setting <code class="inline">CONFIG.volCSV</code>.</p>
+      <h2>Constant Challenges (All Semester)</h2>
+      <ul class="list small">
+        <li><strong>Wear pro-Palestinian attire:</strong> 5 pts/day</li>
+        <li><strong>Hand out flyers:</strong> 1 pt per flyer</li>
+        <li><strong>Print flyers:</strong> 1 pt per 3 flyers printed</li>
+        <li><strong>Posters/Flags on bulletin boards:</strong> 1 pt each</li>
+        <li><strong>Design/print a poster:</strong> 1 pt per printed poster</li>
+        <li><strong>Chalk writing:</strong> 7 pts per statement (+10 if it gets erased)</li>
+        <li><strong>Post-it note messages:</strong> 2 pts each</li>
+        <li><strong>Whiteboard/blackboard messages:</strong> 10 pts each</li>
+        <li><strong>Make a meme:</strong> 5 pts (+3 per 100 story impressions)</li>
+        <li><strong>UCalgary Subreddit post:</strong> 5 pts per 1k views (+2 if taken down)</li>
+        <li><strong>Read an educational book:</strong> 10 pts per 100 pages</li>
+        <li><strong>Comment on a PAC post within 24h:</strong> 3 pts</li>
+        <li><strong>Attend a workshop:</strong> 15 pts</li>
+        <li><strong>Refer a friend to volunteer:</strong> 5 pts per person</li>
+      </ul>
+      <p class="small muted" style="margin-top:10px">
+        Weekly & urgent challenges are announced in the group chat and the doc.
+      </p>
+    </section>
   </main>
 
   <footer>
@@ -107,19 +126,20 @@
   </footer>
 
   <script>
-    // === CONFIG: replace these with your published CSV URLs ===
+    // === CONFIG: replace these with your links ===
     const CONFIG = {
-      // REQUIRED: a single CSV with two columns: House, Points (header row included)
+      // Your publish-to-web CSV link (must end with output=csv)
       houseCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=0&single=true&output=csv",
-      // OPTIONAL: if you later track individuals, add a TopVolunteers CSV; leave empty to hide table
-      volCSV:   "",
-      submitFormURL: "", // or '' to hide button text
+      // Leave empty to hide the Top Volunteers card
+      volCSV: "",
+      // Buttons
+      challengeDocURL: "PASTE_GOOGLE_DOC_LINK_HERE",
       sheetURL: ""
     };
 
     // Button links
-    document.getElementById('formLink').href = CONFIG.submitFormURL;
-    document.getElementById('sheetLink').href = CONFIG.sheetURL;
+    document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
+    document.getElementById('sheetLink').href = CONFIG.sheetURL || "#";
 
     async function fetchCSV(url){
       const res = await fetch(url, {cache:'no-store'});
@@ -128,7 +148,6 @@
     }
 
     function parseCSV(text){
-      // Simple CSV parser (no commas inside quotes). Keep your aggregated tabs simple.
       return text.trim().split(/\r?\n/).map(r => r.split(','));
     }
 
@@ -137,16 +156,18 @@
     }
 
     function renderHouses(rows){
-      // Expect header: House, Points
       const tbody = document.querySelector('#houseTable tbody');
       const stats = document.getElementById('houseStats');
       tbody.innerHTML = ''; stats.innerHTML = '';
+
       const data = rows.slice(1).map(r => ({house:r[0], points:+r[1]||0})).sort((a,b)=>b.points-a.points);
+
       data.forEach((r,i)=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `<td class="rank">${i+1}</td><td><span class="house-pill">${r.house}</span></td><td>${formatNumber(r.points)}</td>`;
         tbody.appendChild(tr);
       });
+
       data.slice(0,3).forEach((r,i)=>{
         const d = document.createElement('div');
         d.className = 'stat';
@@ -156,7 +177,7 @@
     }
 
     function renderVolunteers(rows){
-      // If volCSV is empty, hide the Top Volunteers card gracefully
+      // Hide the card if volCSV isn't provided
       if(!CONFIG.volCSV){
         const card = document.querySelector('#volTable')?.closest('.card');
         if(card) card.style.display = 'none';
@@ -165,12 +186,6 @@
       const tbody = document.querySelector('#volTable tbody');
       tbody.innerHTML = '';
       const data = rows.slice(1).map(r => ({name:r[0], house:r[1], points:+r[2]||0})).sort((a,b)=>b.points-a.points);
-      data.forEach((r,i)=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${(r.points).toLocaleString()}</td>`;
-        tbody.appendChild(tr);
-      });
-    })).sort((a,b)=>b.points-a.points);
       data.forEach((r,i)=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
@@ -195,7 +210,7 @@
     }
 
     load();
-    setInterval(load, 60000); // refresh every 60s
+    setInterval(load, 60000);
   </script>
 </body>
 </html>
