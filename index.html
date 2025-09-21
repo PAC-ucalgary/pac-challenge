@@ -70,7 +70,9 @@
       border-radius:16px; padding:14px; display:flex; align-items:flex-start; gap:12px
     }
     .pts{
-      margin-left:auto; font-weight:800; padding:.25rem .6rem; border-radius:999px;
+      display:inline-flex; align-items:center; justify-content:center; /* centered text */
+      min-width:78px; height:34px; padding:0 .6rem; text-align:center; /* uniform pill size */
+      font-weight:800; border-radius:999px;
       background:rgba(76,201,240,.15); border:1px solid rgba(76,201,240,.35)
     }
     .title{font-weight:700}
@@ -100,7 +102,8 @@
         <div class="row" id="houseStats"></div>
         <table id="houseTable" style="margin-top:12px">
           <thead>
-            <tr><th>Rank</th><th>House</th><th>Total Points</th></tr>
+            <!-- Captain column added -->
+            <tr><th>Rank</th><th>House</th><th>Captain</th><th>Total Points</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -172,6 +175,14 @@
       sheetURL: "" // optional view-only sheet link
     };
 
+    // NEW: House → Captain mapping (edit these names)
+    const CAPTAINS = {
+      "Quds": "Muhammad Eldib",
+      "Gaza": "Ghassan Abuamsha",
+      "Qalqilya": "Nour Issa",
+      "Besan": "Besan Jadalowen"
+    };
+
     // Buttons
     document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
     document.getElementById('sheetLink').href = CONFIG.sheetURL || "#";
@@ -195,16 +206,21 @@
 
       data.forEach((r,i)=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="rank">${i+1}</td><td><span class="house-pill">${r.house}</span></td><td>${formatNumber(r.points)}</td>`;
+        tr.innerHTML = `
+          <td class="rank">${i+1}</td>
+          <td><span class="house-pill">${r.house}</span></td>
+          <td>${CAPTAINS[r.house] || "—"}</td>
+          <td>${formatNumber(r.points)}</td>`;
         tbody.appendChild(tr);
       });
 
+      // podium cards (now also show captain)
       data.slice(0,3).forEach((r,i)=>{
         const d = document.createElement('div');
         d.className = 'stat';
         d.innerHTML = `<div class="small muted">#${i+1} House</div>
                        <div style="font-weight:800; font-size:1.1rem">${r.house}</div>
-                       <div class="small muted">${formatNumber(r.points)} pts</div>`;
+                       <div class="small muted">${formatNumber(r.points)} pts • Captain: ${CAPTAINS[r.house] || "—"}</div>`;
         stats.appendChild(d);
       });
     }
