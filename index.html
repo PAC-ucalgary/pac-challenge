@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --bg:#0b0f14; --panel:#111823; --text:#e8eef5; --muted:#a7b3c2;
@@ -26,22 +27,50 @@
     }
     a{color:inherit; text-decoration:none}
     .container{width:min(1100px,92%); margin-inline:auto}
-    header{position:sticky; top:0; z-index:10; backdrop-filter:saturate(150%) blur(8px);
+    header{
+      position:sticky; top:0; z-index:10; backdrop-filter:saturate(150%) blur(8px);
       background:linear-gradient(180deg, rgba(11,15,20,.85), rgba(11,15,20,.55));
-      border-bottom:1px solid rgba(255,255,255,.06)}
-    .nav{display:flex; align-items:center; justify-content:space-between; padding:.9rem 0}
+      border-bottom:1px solid rgba(255,255,255,.06)
+    }
 
-    /* Brand/logo (back to the earlier size/spacing) */
-    .brand{display:flex; align-items:center; gap:.55rem; font-weight:800; letter-spacing:.3px}
-    .brand-logo{width:32px; height:32px; object-fit:contain; border-radius:6px}
-
-    .chip{display:inline-block; padding:.3rem .6rem; border-radius:999px; font-size:.75rem;
-      color:#06121a; background:linear-gradient(110deg, var(--brand2), #7fe9d0)}
-    .links{display:flex; gap:1rem}
-    .btn{display:inline-flex; align-items:center; gap:.6rem; padding:.75rem 1rem; border-radius:14px;
+    /* Header nav */
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.9rem 0; gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:.55rem;
+      font-weight:800; letter-spacing:.3px; color:inherit; text-decoration:none;
+    }
+    .brand-logo{
+      width:34px; height:34px; object-fit:contain;
+      border-radius:6px;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.2));
+    }
+    .chip{
+      display:inline-block; padding:.3rem .6rem; border-radius:999px; font-size:.75rem;
+      color:#06121a; background:linear-gradient(110deg, var(--brand2), #7fe9d0)
+    }
+    .links{display:flex; gap:1rem; flex-wrap:wrap}
+    .btn{
+      display:inline-flex; align-items:center; gap:.6rem; padding:.75rem 1rem; border-radius:14px;
       background:linear-gradient(180deg, var(--brand), #2ea9ce); color:#041018; font-weight:700;
-      box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.06)}
+      box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.06)
+    }
     .btn.secondary{background:transparent; color:var(--text); border:1px solid rgba(167,179,194,.25)}
+
+    /* Responsive header fix */
+    @media (max-width: 540px){
+      .nav{ flex-wrap:wrap; }
+      .brand{ flex:1 1 auto; min-width:0; }
+      .links{
+        flex:1 1 100%; order:3; gap:.6rem; margin-top:.25rem;
+      }
+      .btn{ padding:.6rem .8rem; font-size:.95rem; }
+      .brand-logo{ width:28px; height:28px; }
+      .chip{ font-size:.7rem; padding:.25rem .5rem; }
+    }
+
     main{padding:32px 0 64px}
     .grid{display:grid; gap:20px}
     @media(min-width:900px){ .grid{grid-template-columns:1.1fr .9fr} }
@@ -60,17 +89,23 @@
     .row{display:flex; gap:12px; flex-wrap:wrap}
     .stat{flex:1 1 140px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
       border-radius:16px; padding:14px}
+
     footer{padding:24px 0 48px; color:var(--muted); text-align:center}
     .error{color:#ffb4b4}
     code.inline{background:rgba(255,255,255,.08); padding:.2rem .35rem; border-radius:6px}
 
-    /* Challenge cards (keep the clean look) */
-    .challenge-grid{display:grid; gap:16px; grid-template-columns:repeat(1,minmax(0,1fr))}
-    @media(min-width:700px){ .challenge-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
-    @media(min-width:1000px){ .challenge-grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
+    /* Challenge grid */
+    .challenge-grid{
+      display:grid; gap:16px; grid-template-columns:repeat(1,minmax(0,1fr));
+    }
+    @media(min-width:700px){ .challenge-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+    @media(min-width:1000px){ .challenge-grid{grid-template-columns:repeat(3,minmax(0,1fr));} }
+
     .challenge{
+      position:relative;
       background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid rgba(76,201,240,.18); border-radius:18px; padding:18px 16px;
+      border:1px solid rgba(76,201,240,.18);
+      border-radius:18px; padding:18px 16px;
       display:flex; align-items:center; gap:14px; justify-content:space-between;
     }
     .challenge .left{flex:1 1 auto; min-width:0}
@@ -78,10 +113,13 @@
     .sub{font-size:.85rem; color:var(--muted); margin-top:4px}
     .pts{
       display:inline-flex; align-items:center; justify-content:center;
-      height:38px; padding:0 .85rem; font-weight:900; border-radius:999px; white-space:nowrap;
-      background:rgba(6,18,26,.6); border:1.5px solid rgba(76,201,240,.45);
+      height:38px; padding:0 .85rem; text-align:center;
+      font-weight:900; border-radius:999px; white-space:nowrap;
+      background:rgba(6,18,26,.6);
+      border:1.5px solid rgba(76,201,240,.45);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+      flex:0 0 auto;
     }
-    .pts.tight{font-size:.9rem; height:36px; padding:0 .65rem}
   </style>
 </head>
 <body>
@@ -106,9 +144,7 @@
         <p class="small muted">Live standings for the four houses. Keep completing challenges to push your team up the board.</p>
         <div class="row" id="houseStats"></div>
         <table id="houseTable" style="margin-top:12px">
-          <thead>
-            <tr><th>Rank</th><th>House</th><th>Captain</th><th>Total Points</th></tr>
-          </thead>
+          <thead><tr><th>Rank</th><th>House</th><th>Captain</th><th>Total Points</th></tr></thead>
           <tbody></tbody>
         </table>
         <div id="houseError" class="error small"></div>
@@ -118,32 +154,29 @@
         <h2>Top 5 Individuals</h2>
         <p class="small muted">Live ranking of volunteers based on approved points.</p>
         <table id="top5Table">
-          <thead>
-            <tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr>
-          </thead>
+          <thead><tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr></thead>
           <tbody></tbody>
         </table>
         <div id="indTopError" class="error small"></div>
       </div>
     </section>
 
+    <!-- Challenges (only all semester ones you wanted) -->
     <section class="card" style="margin-top:20px">
       <h2>Constant Challenges (All Semester)</h2>
       <div class="challenge-grid">
         <div class="challenge"><div class="left"><div class="title">Wear pro-Palestinian attire</div><div class="sub">Keffiyeh, shirt, wristband…</div></div><div class="pts">5 / day</div></div>
         <div class="challenge"><div class="left"><div class="title">Whiteboard/blackboard messages</div><div class="sub">Use clear, factual language</div></div><div class="pts">10 each</div></div>
         <div class="challenge"><div class="left"><div class="title">Post-it note messages</div><div class="sub">Mirrors, cubicles, elevators…</div></div><div class="pts">2 each</div></div>
-        <div class="challenge"><div class="left"><div class="title">Read an educational book</div><div class="sub">From the approved list</div></div><div class="pts tight">10 / 100 pages</div></div>
-        <div class="challenge"><div class="left"><div class="title">Refer a friend to volunteer (GC)</div><div class="sub">Add them to the group chat</div></div><div class="pts">5 / person</div></div>
+        <div class="challenge"><div class="left"><div class="title">Read an educational book</div><div class="sub">100 pages from the approved list</div></div><div class="pts">10 / 100 pages</div></div>
+        <div class="challenge"><div class="left"><div class="title">Refer a friend to volunteer</div><div class="sub">Add them to the GC</div></div><div class="pts">5 / person</div></div>
       </div>
     </section>
 
     <section class="card" id="full-leaderboard" style="margin-top:20px">
       <h2>Individual Leaderboard (Full)</h2>
       <table id="indivTable">
-        <thead>
-          <tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr>
-        </thead>
+        <thead><tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr></thead>
         <tbody></tbody>
       </table>
       <div id="indError" class="error small"></div>
@@ -168,81 +201,40 @@
       if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
     });
 
-    async function fetchCSV(url){
-      const res = await fetch(url, {cache:'no-store'});
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.text();
-    }
+    async function fetchCSV(url){ const res = await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); return await res.text(); }
     function parseCSV(t){ return t.trim().split(/\r?\n/).map(r => r.split(',')); }
     function formatNumber(n){ const x = Number(n); return isFinite(x) ? x.toLocaleString() : n; }
 
     function renderHouses(rows){
-      const tbody = document.querySelector('#houseTable tbody');
-      const stats = document.getElementById('houseStats');
-      tbody.innerHTML = ''; stats.innerHTML = '';
-      const data = rows.slice(1).map(r => ({house:r[0], points:+r[1]||0})).sort((a,b)=>b.points-a.points);
-
-      data.forEach((r,i)=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="rank">${i+1}</td>
-                        <td><span class="house-pill">${r.house}</span></td>
-                        <td>${CAPTAINS[r.house] || "—"}</td>
-                        <td>${formatNumber(r.points)}</td>`;
-        tbody.appendChild(tr);
-      });
-
-      data.slice(0,3).forEach((r,i)=>{
-        const d = document.createElement('div'); d.className='stat';
-        d.innerHTML = `<div class="small muted">#${i+1} House</div>
-                       <div style="font-weight:800; font-size:1.1rem">${r.house}</div>
-                       <div class="small muted">${formatNumber(r.points)} pts • Captain: ${CAPTAINS[r.house] || "—"}</div>`;
-        stats.appendChild(d);
-      });
+      const tbody=document.querySelector('#houseTable tbody'); const stats=document.getElementById('houseStats');
+      tbody.innerHTML=''; stats.innerHTML='';
+      const data=rows.slice(1).map(r=>({house:r[0],points:+r[1]||0})).sort((a,b)=>b.points-a.points);
+      data.forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="rank">${i+1}</td><td><span class="house-pill">${r.house}</span></td><td>${CAPTAINS[r.house]||"—"}</td><td>${formatNumber(r.points)}</td>`; tbody.appendChild(tr); });
+      data.slice(0,3).forEach((r,i)=>{ const d=document.createElement('div'); d.className='stat'; d.innerHTML=`<div class="small muted">#${i+1} House</div><div style="font-weight:800; font-size:1.1rem">${r.house}</div><div class="small muted">${formatNumber(r.points)} pts • Captain: ${CAPTAINS[r.house]||"—"}</div>`; stats.appendChild(d); });
     }
 
     function renderTop5(rows){
-      const tbody = document.querySelector('#top5Table tbody');
-      tbody.innerHTML = '';
-      if(!rows.length) return;
-      const data = rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
-        .sort((a,b)=>b.points-a.points).slice(0,5);
-      data.forEach((r,i)=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
-        tbody.appendChild(tr);
-      });
+      const tbody=document.querySelector('#top5Table tbody'); tbody.innerHTML=''; if(!rows.length) return;
+      const data=rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0})).sort((a,b)=>b.points-a.points).slice(0,5);
+      data.forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`; tbody.appendChild(tr); });
     }
-
     function renderIndividuals(rows){
-      const tbody = document.querySelector('#indivTable tbody');
-      tbody.innerHTML = '';
-      if(!rows.length) return;
-      const data = rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
-        .sort((a,b)=>b.points-a.points);
-      data.forEach((r,i)=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
-        tbody.appendChild(tr);
-      });
+      const tbody=document.querySelector('#indivTable tbody'); tbody.innerHTML=''; if(!rows.length) return;
+      const data=rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0})).sort((a,b)=>b.points-a.points);
+      data.forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`; tbody.appendChild(tr); });
     }
 
     async function load(){
       try{
-        const houseText = await fetchCSV(CONFIG.houseCSV);
-        renderHouses(parseCSV(houseText));
-
-        const indivText = await fetchCSV(CONFIG.individualCSV);
-        const rows = parseCSV(indivText);
-        renderTop5(rows);
-        renderIndividuals(rows);
+        const houseText=await fetchCSV(CONFIG.houseCSV); renderHouses(parseCSV(houseText));
+        const indivText=await fetchCSV(CONFIG.individualCSV); const rows=parseCSV(indivText); renderTop5(rows); renderIndividuals(rows);
       }catch(err){
-        document.getElementById('houseError').textContent = 'House data error: ' + err.message;
-        document.getElementById('indError').textContent = 'Individual data error: ' + err.message;
-        document.getElementById('indTopError').textContent = 'Individual data error: ' + err.message;
+        document.getElementById('houseError').textContent='House data error: '+err.message;
+        document.getElementById('indError').textContent='Individual data error: '+err.message;
+        document.getElementById('indTopError').textContent='Individual data error: '+err.message;
       }
     }
-    load();
-    setInterval(load, 60000);
+    load(); setInterval(load,60000);
   </script>
 </body>
 </html>
