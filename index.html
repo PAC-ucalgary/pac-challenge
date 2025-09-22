@@ -193,7 +193,7 @@
       individualCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=200435731&single=true&output=csv",
       challengeDocURL: "https://docs.google.com/document/d/1j3UUIg44EYJbwhgLaZoyTG-nD0Af_nuqWdvY7mDyT7g/edit?usp=sharing"
     };
-    const CAPTAINS = { "Quds":"Mohammad Eldib", "Gaza":"Ghassan Abuamsha", "Qalqilya":"Nour Issa", "Besan":"Besan Jadalowen" };
+    const CAPTAINS = { "Quds":"Mohammad Eldib", "Gaza":"Ghassan Abuamsha", "Qalqilya":"  Nour Issa", "Besan":" Besan Jadalowen" };
 
     document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
     document.getElementById('fullBtn').addEventListener('click', (e)=>{
@@ -204,14 +204,42 @@
     async function fetchCSV(url){ const res = await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); return await res.text(); }
     function parseCSV(t){ return t.trim().split(/\r?\n/).map(r => r.split(',')); }
     function formatNumber(n){ const x = Number(n); return isFinite(x) ? x.toLocaleString() : n; }
+// --- houses ---
+function renderHouses(rows){
+  const tbody = document.querySelector('#houseTable tbody');
+  const stats = document.getElementById('houseStats');
+  tbody.innerHTML = ''; 
+  stats.innerHTML = '';
 
-    function renderHouses(rows){
-      const tbody=document.querySelector('#houseTable tbody'); const stats=document.getElementById('houseStats');
-      tbody.innerHTML=''; stats.innerHTML='';
-      const data=rows.slice(1).map(r=>({house:r[0],points:+r[1]||0})).sort((a,b)=>b.points-a.points);
-      data.forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="rank">${i+1}</td><td><span class="house-pill">${r.house}</span></td><td>${CAPTAINS[r.house]||"—"}</td><td>${formatNumber(r.points)}</td>`; tbody.appendChild(tr); });
-      data.slice(0,3).forEach((r,i)=>{ const d=document.createElement('div'); d.className='stat'; d.innerHTML=`<div class="small muted">#${i+1} House</div><div style="font-weight:800; font-size:1.1rem">${r.house}</div><div class="small muted">${formatNumber(r.points)} pts • Captain: ${CAPTAINS[r.house]||"—"}</div>`; stats.appendChild(d); });
-    }
+  const data = rows.slice(1).map(r => ({
+    house: r[0],
+    points: +r[1] || 0
+  })).sort((a,b)=>b.points-a.points);
+
+  // Table rows
+  data.forEach((r,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="rank">${i+1}</td>
+      <td><span class="house-pill">${r.house}</span></td>
+      <td>${CAPTAINS[r.house] || "—"}</td>
+      <td>${formatNumber(r.points)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Stat cards for top 3 houses
+  data.slice(0,3).forEach((r,i)=>{
+    const d = document.createElement('div');
+    d.className='stat';
+    d.innerHTML = `
+      <div class="small muted">#${i+1} House</div>
+      <div style="font-weight:800; font-size:1.1rem">${r.house}</div>
+      <div class="small muted">
+        ${formatNumber(r.points)} pts • Captain:<br>${CAPTAINS[r.house] || "—"}
+      </div>`;
+    stats.appendChild(d);
+  });
+}
 
     function renderTop5(rows){
       const tbody=document.querySelector('#top5Table tbody'); tbody.innerHTML=''; if(!rows.length) return;
