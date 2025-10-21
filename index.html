@@ -23,46 +23,38 @@
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
 body{
-  margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   color:var(--text);
+  background: var(--bg);
+}
+
+/* Subtle moving glow background */
+body::before{
+  content:"";
+  position:fixed;
+  inset:-25vmax;                 /* extend beyond edges to hide movement */
+  pointer-events:none;
+  z-index:-1;
   background:
-    radial-gradient(1200px 600px at 78% -12%, rgba(76,201,240,.25), transparent 60%),
-    radial-gradient(900px 450px at -10% 8%,  rgba(163,247,191,.25), transparent 60%),
-    radial-gradient(900px 500px at 110% 85%, rgba(76,201,240,.25), transparent 65%),
-    var(--bg);
-  background-attachment: fixed,fixed,fixed,fixed;
-  animation: bgFloat 10s ease-in-out infinite alternate;
+    radial-gradient(40vmax 28vmax at 75% 0%,  rgba(76,201,240,.16), transparent 60%),
+    radial-gradient(36vmax 24vmax at 0% 20%,   rgba(163,247,191,.13), transparent 60%),
+    radial-gradient(48vmax 32vmax at 110% 95%, rgba(76,201,240,.10), transparent 65%);
+  filter: blur(30px) saturate(120%);
+  animation: driftGlow 22s ease-in-out infinite alternate;
 }
 
-/* Smooth drifting of the radial glows */
-@keyframes bgFloat{
-  0%{
-    background-position:
-      78% -12%,
-      -10% 8%,
-      110% 85%,
-      0 0;
-  }
-  50%{
-    background-position:
-      70% -6%,
-      -8% 12%,
-      92% 90%,
-      0 0;
-  }
-  100%{
-    background-position:
-      85% -18%,
-      -15% 4%,
-      105% 78%,
-      0 0;
-  }
+@keyframes driftGlow{
+  0%   { transform: translate3d(-2%, -1%, 0) rotate(0deg);   }
+  50%  { transform: translate3d( 2%,  1%, 0) rotate(3deg);   }
+  100% { transform: translate3d(-1%,  2%, 0) rotate(-2deg);  }
 }
 
-/* Respect users who prefer reduced motion */
+/* Respect reduced motion */
 @media (prefers-reduced-motion: reduce){
-  body{ animation:none; }
+  body::before{ animation:none; }
 }
+
 
 
     /* Prevent purple visited links + underlines anywhere */
