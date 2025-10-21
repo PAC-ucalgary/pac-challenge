@@ -12,28 +12,21 @@
   <style>
     :root{
       --bg:#0b0f14;
-      /* more transparent panel */
       --panel: rgba(17,24,35,.65);
       --text:#e8eef5; --muted:#a7b3c2;
-      --brand:#4cc9f0; --brand2:#a3f7bf; --ring:rgba(76,201,240,.35);
+      --brand:#4cc9f0; --brand2:#a3f7bf;
       --shadow:0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.03) inset;
-
-      --gold:#f5d770; --gold-ink:#3a3000;
-      --silver:#cfd7e6; --silver-ink:#2c3240;
-      --bronze:#e7b28a; --bronze-ink:#3e2715;
+      --gold:#f5d770; --silver:#cfd7e6; --bronze:#e7b28a;
     }
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
     body{
       margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       background:
         radial-gradient(1200px 600px at 80% -10%, rgba(76,201,240,.15), transparent 60%),
         radial-gradient(800px 400px at -10% 10%, rgba(163,247,191,.12), transparent 60%),
         var(--bg);
-      color:var(--text)
+      color:var(--text);
     }
-    a{color:inherit; text-decoration:none}
-    .container{width:min(1100px,92%); margin-inline:auto}
     header{
       position:sticky; top:0; z-index:10; backdrop-filter:saturate(150%) blur(8px);
       background:linear-gradient(180deg, rgba(11,15,20,.75), rgba(11,15,20,.45));
@@ -42,26 +35,7 @@
     }
     @keyframes fadeSlideDown { from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:translateY(0)} }
     .header-animate{ animation:fadeSlideDown .7s ease-out forwards }
-    @media (prefers-reduced-motion:reduce){ .header-animate{animation:none; opacity:1!important; transform:none!important} }
-
-    /* Header nav */
-    .nav{ display:flex; align-items:center; justify-content:space-between; padding:.9rem 0; gap:12px; }
-    .brand{ display:flex; align-items:center; gap:.55rem; font-weight:800; letter-spacing:.3px; }
-    .brand-logo{ width:55px; height:55px; object-fit:contain; border-radius:6px; filter:drop-shadow(0 1px 0 rgba(0,0,0,.2)) }
-    .chip{ display:inline-block; padding:.3rem .6rem; border-radius:999px; font-size:.75rem; color:#06121a; background:linear-gradient(110deg, var(--brand2), #7fe9d0) }
-    .links{display:flex; gap:1rem; flex-wrap:wrap}
-    .btn{ display:inline-flex; align-items:center; gap:.6rem; padding:.75rem 1rem; border-radius:14px; background:linear-gradient(180deg, var(--brand), #2ea9ce); color:#041018; font-weight:700; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.06) }
-    .btn.secondary{background:transparent; color:var(--text); border:1px solid rgba(167,179,194,.25)}
-
-    @media (max-width:540px){
-      .nav{flex-wrap:wrap}
-      .brand{flex:1 1 auto; min-width:0}
-      .links{flex:1 1 100%; order:3; gap:.6rem; margin-top:.25rem}
-      .btn{padding:.6rem .8rem; font-size:.95rem}
-      .brand-logo{width:28px; height:28px}
-      .chip{font-size:.7rem; padding:.25rem .5rem}
-    }
-
+    .container{width:min(1100px,92%); margin-inline:auto}
     main{padding:32px 0 64px}
     .grid{display:grid; gap:20px}
     @media(min-width:900px){ .grid{grid-template-columns:1.1fr .9fr} }
@@ -73,72 +47,35 @@
       box-shadow:var(--shadow);
       backdrop-filter: saturate(140%) blur(6px);
     }
-    h1{font-size:clamp(28px,3vw,40px); margin:.2rem 0 1rem}
-    h2{font-size:clamp(18px,2.2vw,24px); margin:.2rem 0 1rem}
-    p{color:var(--muted)}
     table{width:100%; border-collapse:collapse; font-size:.95rem}
-    th, td{padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.06); text-align:left}
-    th{color:#cfe3f7}
+    th,td{padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.06)}
+    th{color:#cfe3f7;text-align:left}
     tr:hover td{background:rgba(255,255,255,.03)}
-    .rank{font-weight:800}
-    .house-pill{display:inline-flex; align-items:center; gap:.5rem; padding:.3rem .6rem; border-radius:999px; background:rgba(76,201,240,.12); border:1px solid rgba(76,201,240,.3)}
-    .muted{color:var(--muted)} .small{font-size:.85rem}
+    .house-pill{display:inline-flex; align-items:center; padding:.3rem .6rem; border-radius:999px; background:rgba(76,201,240,.12); border:1px solid rgba(76,201,240,.3)}
     .row{display:flex; gap:12px; flex-wrap:wrap}
     .stat{flex:1 1 140px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px}
 
-    /* medal highlighting */
-    .medal-1 td{ background:linear-gradient(180deg, rgba(245,215,112,.18), rgba(245,215,112,.08)); border-bottom:1px solid rgba(245,215,112,.35) }
-    .medal-2 td{ background:linear-gradient(180deg, rgba(207,215,230,.16), rgba(207,215,230,.06)); border-bottom:1px solid rgba(207,215,230,.35) }
-    .medal-3 td{ background:linear-gradient(180deg, rgba(231,178,138,.16), rgba(231,178,138,.06)); border-bottom:1px solid rgba(231,178,138,.35) }
-    .badge{ display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .55rem; border-radius:999px; font-size:.8rem; font-weight:800; border:1px solid rgba(255,255,255,.1) }
-    .badge.gold{ background:var(--gold); color:var(--gold-ink) }
-    .badge.silver{ background:var(--silver); color:var(--silver-ink) }
-    .badge.bronze{ background:var(--bronze); color:var(--bronze-ink) }
+    .medal-1 td{ background:linear-gradient(180deg, rgba(245,215,112,.18), rgba(245,215,112,.08)); }
+    .medal-2 td{ background:linear-gradient(180deg, rgba(207,215,230,.16), rgba(207,215,230,.06)); }
+    .medal-3 td{ background:linear-gradient(180deg, rgba(231,178,138,.16), rgba(231,178,138,.06)); }
 
-    /* FLIP row move - transition target */
-    #houseTable tbody tr{ transition: transform .45s ease, opacity .45s ease; will-change: transform }
-    .enter{ opacity:0; transform:translateY(-6px) }
-    .enter.done{ opacity:1; transform:translateY(0) }
-
-    footer{padding:24px 0 48px; color:var(--muted); text-align:center}
-    .error{color:#ffb4b4}
-    code.inline{background:rgba(255,255,255,.08); padding:.2rem .35rem; border-radius:6px}
-
-    /* Challenge grid */
-    .challenge-grid{ display:grid; gap:16px; grid-template-columns:repeat(1,minmax(0,1fr)) }
-    @media(min-width:700px){ .challenge-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
-    @media(min-width:1000px){ .challenge-grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
-    .challenge{
-      position:relative; background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid rgba(76,201,240,.18); border-radius:18px; padding:18px 16px;
-      display:flex; align-items:center; gap:14px; justify-content:space-between;
-    }
-    .challenge .left{flex:1 1 auto; min-width:0}
-    .title{font-weight:800; letter-spacing:.2px}
-    .sub{font-size:.85rem; color:var(--muted); margin-top:4px}
-    .pts{ display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 .85rem; text-align:center;
-      font-weight:900; border-radius:999px; white-space:nowrap; background:rgba(6,18,26,.6);
-      border:1.5px solid rgba(76,201,240,.45); box-shadow:inset 0 1px 0 rgba(255,255,255,.06); flex:0 0 auto; }
-
-    /* Confetti canvas */
-    #confettiCanvas{
-      position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:999;
-    }
+    footer{padding:24px 0 48px; color:#a7b3c2; text-align:center}
+    #confettiCanvas{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:999;}
   </style>
 </head>
 <body>
   <canvas id="confettiCanvas"></canvas>
 
   <header id="siteHeader">
-    <div class="container nav">
-      <a class="brand" href="./" aria-label="PAC Challenge home">
-        <img class="brand-logo" src="PAC Logo.svg" alt="PAC logo" />
+    <div class="container nav" style="display:flex;align-items:center;justify-content:space-between;padding:.9rem 0;">
+      <a class="brand" href="./" style="display:flex;align-items:center;gap:.55rem;font-weight:800;">
+        <img src="PAC Logo.svg" style="width:55px;height:55px;object-fit:contain;border-radius:6px;">
         <span>PAC Challenge</span>
-        <span class="chip">Live</span>
+        <span style="display:inline-block;padding:.3rem .6rem;border-radius:999px;font-size:.75rem;background:linear-gradient(110deg,#a3f7bf,#7fe9d0);color:#06121a;">Live</span>
       </a>
-      <div class="links">
-        <a class="btn" id="docLink" target="_blank" rel="noopener">Challenge Doc</a>
-        <a class="btn" id="fullBtn" href="#full-leaderboard">View Full Leaderboard</a>
+      <div class="links" style="display:flex;gap:1rem;">
+        <a id="docLink" target="_blank" rel="noopener" class="btn" style="background:linear-gradient(180deg,#4cc9f0,#2ea9ce);padding:.75rem 1rem;border-radius:14px;color:#041018;font-weight:700;">Challenge Doc</a>
+        <a id="fullBtn" href="#full-leaderboard" class="btn" style="background:linear-gradient(180deg,#4cc9f0,#2ea9ce);padding:.75rem 1rem;border-radius:14px;color:#041018;font-weight:700;">View Full Leaderboard</a>
       </div>
     </div>
   </header>
@@ -147,44 +84,20 @@
     <section class="grid">
       <div class="card">
         <h1>House Leaderboard</h1>
-        <p class="small muted">Live standings for the four houses. Keep completing challenges to push your team up the board.</p>
+        <p class="small" style="color:#a7b3c2;">Live standings for the four houses.</p>
         <div class="row" id="houseStats"></div>
         <table id="houseTable" style="margin-top:12px">
           <thead><tr><th>Rank</th><th>House</th><th>Captain</th><th>Total Points</th></tr></thead>
           <tbody></tbody>
         </table>
-        <div id="houseError" class="error small"></div>
       </div>
-
       <div class="card">
         <h2>Top 5 Individuals</h2>
-        <p class="small muted">Live ranking of volunteers based on approved points.</p>
         <table id="top5Table">
           <thead><tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr></thead>
           <tbody></tbody>
         </table>
-        <div id="indTopError" class="error small"></div>
       </div>
-    </section>
-
-    <section class="card" style="margin-top:20px">
-      <h2>Constant Challenges (All Semester)</h2>
-      <div class="challenge-grid">
-        <div class="challenge"><div class="left"><div class="title">Wear pro-Palestinian attire</div><div class="sub">Keffiyeh, shirt, wristband…</div></div><div class="pts">5 / day</div></div>
-        <div class="challenge"><div class="left"><div class="title">Whiteboard/blackboard messages</div><div class="sub">Use clear, factual language</div></div><div class="pts">10 each</div></div>
-        <div class="challenge"><div class="left"><div class="title">Post-it note messages</div><div class="sub">Mirrors, cubicles, elevators…</div></div><div class="pts">2 each</div></div>
-        <div class="challenge"><div class="left"><div class="title">Read an educational book</div><div class="sub">100 pages from the approved list</div></div><div class="pts">10 / 100 pages</div></div>
-        <div class="challenge"><div class="left"><div class="title">Refer a friend to volunteer</div><div class="sub">Add them to the GC</div></div><div class="pts">5 / person</div></div>
-      </div>
-    </section>
-
-    <section class="card" id="full-leaderboard" style="margin-top:20px">
-      <h2>Individual Leaderboard (Full)</h2>
-      <table id="indivTable">
-        <thead><tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <div id="indError" class="error small"></div>
     </section>
   </main>
 
@@ -194,215 +107,82 @@
 
   <script>
     const CONFIG = {
-      houseCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=0&single=true&output=csv",
-      individualCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=200435731&single=true&output=csv",
-      challengeDocURL: "https://docs.google.com/document/d/1j3UUIg44EYJbwhgLaZoyTG-nD0Af_nuqWdvY7mDyT7g/edit?usp=sharing"
+      houseCSV:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=0&single=true&output=csv",
+      individualCSV:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=200435731&single=true&output=csv"
     };
-    const CAPTAINS = { "Quds":"Mohammad Eldib", "Gaza":"Ghassan Abuamsha", "Qalqilya":"Nour Issa", "Besan":"Besan Jadalowen" };
+    const CAPTAINS={"Quds":"Mohammad Eldib","Gaza":"Ghassan Abuamsha","Qalqilya":"Nour Issa","Besan":"Besan Jadalowen"};
+    let lastLeader=null;
 
-    // State for animations
-    let lastLeader = null;
-    let lastRowPositions = null; // {house: topPx}
+    async function fetchCSV(url){const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error(res.status);return await res.text();}
+    function parseCSV(t){return t.trim().split(/\r?\n/).map(r=>r.split(','));}
+    function formatNumber(n){const x=Number(n);return isFinite(x)?x.toLocaleString():n;}
 
-    // Smooth jump to full leaderboard
-    document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
-    document.getElementById('fullBtn').addEventListener('click', (e)=>{
-      const el = document.querySelector('#full-leaderboard');
-      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
-    });
-
-    // Header entrance animation
-    window.addEventListener('DOMContentLoaded', () => {
-      const h = document.getElementById('siteHeader');
-      requestAnimationFrame(()=> h.classList.add('header-animate'));
-    });
-
-    async function fetchCSV(url){ const res = await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); return await res.text(); }
-    function parseCSV(t){ return t.trim().split(/\r?\n/).map(r => r.split(',')); }
-    function formatNumber(n){ const x = Number(n); return isFinite(x) ? x.toLocaleString() : n; }
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // Measure current row tops keyed by house
-    function measureRowPositions(){
-      const map = {};
-      const rows = document.querySelectorAll('#houseTable tbody tr');
-      rows.forEach(r=>{
-        const key = r.getAttribute('data-house');
-        if(!key) return;
-        const rect = r.getBoundingClientRect();
-        map[key] = rect.top;
-      });
-      return map;
-    }
-
-    // --- confetti (tiny inline engine, no libs) ---
     function confettiBurst(){
-      if(prefersReduced) return;
-
-      const canvas = document.getElementById('confettiCanvas');
-      const ctx = canvas.getContext('2d');
-      const dpr = Math.max(window.devicePixelRatio || 1, 1);
-
-      function resize(){
-        canvas.width = Math.floor(window.innerWidth * dpr);
-        canvas.height = Math.floor(window.innerHeight * dpr);
-        ctx.setTransform(dpr,0,0,dpr,0,0);
+      const canvas=document.getElementById('confettiCanvas');
+      const ctx=canvas.getContext('2d');
+      canvas.width=innerWidth;canvas.height=innerHeight;
+      const parts=[];
+      const colors=['#4cc9f0','#a3f7bf','#f5d770','#cfd7e6','#e7b28a'];
+      for(let i=0;i<120;i++){
+        parts.push({x:innerWidth/2+(Math.random()-0.5)*100,y:-20,vx:(Math.random()-0.5)*6,vy:2+Math.random()*3,g:0.2,w:6+Math.random()*6,h:10+Math.random()*8,r:Math.random()*Math.PI,spin:(Math.random()-0.5)*0.3,life:80,color:colors[Math.random()*colors.length|0]});
       }
-      resize();
-
-      const colors = ['#4cc9f0','#a3f7bf','#f5d770','#cfd7e6','#e7b28a','#ffffff'];
-      const N = 140;
-      const parts = [];
-      for(let i=0;i<N;i++){
-        parts.push({
-          x: window.innerWidth*0.5 + (Math.random()-0.5)*80,
-          y: -20 + Math.random()*20,
-          vx: (Math.random()-0.5)*6,
-          vy: 2 + Math.random()*3,
-          g: 0.15 + Math.random()*0.2,
-          w: 6 + Math.random()*6,
-          h: 10 + Math.random()*8,
-          r: Math.random()*Math.PI,
-          spin: (Math.random()-0.5)*0.3,
-          life: 60 + Math.random()*30,
-          color: colors[Math.random()*colors.length | 0]
-        });
-      }
-
-      let rafId;
       function tick(){
         ctx.clearRect(0,0,canvas.width,canvas.height);
-        parts.forEach(p=>{
-          p.vy += p.g; p.x += p.vx; p.y += p.vy; p.r += p.spin; p.life -= 1;
-          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
-          ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
-        });
-        for(let i=parts.length-1;i>=0;i--) if(parts[i].life<=0 || parts[i].y>window.innerHeight+40) parts.splice(i,1);
-        if(parts.length>0) rafId = requestAnimationFrame(tick); else ctx.clearRect(0,0,canvas.width,canvas.height);
+        parts.forEach(p=>{p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.r+=p.spin;p.life--;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});
+        for(let i=parts.length-1;i>=0;i--)if(parts[i].life<=0||parts[i].y>innerHeight+40)parts.splice(i,1);
+        if(parts.length>0)requestAnimationFrame(tick);
       }
       tick();
-
-      const onResize = ()=>resize();
-      window.addEventListener('resize', onResize, {once:true});
-      setTimeout(()=>{ cancelAnimationFrame(rafId); ctx.clearRect(0,0,canvas.width,canvas.height); }, 2200);
+      setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height),2000);
     }
 
-    // --- houses ---
     function renderHouses(rows){
-      const tbody = document.querySelector('#houseTable tbody');
-      const stats = document.getElementById('houseStats');
-
-      // FLIP: measure before we change DOM
-      lastRowPositions = measureRowPositions();
-
-      tbody.innerHTML = ''; 
-      stats.innerHTML = '';
-
-      const data = rows.slice(1).map(r => ({
-        house: r[0],
-        points: +r[1] || 0
-      })).sort((a,b)=>b.points-a.points);
-
-      // Leader change confetti
-      const currentLeader = data[0]?.house || null;
-      if(lastLeader && currentLeader && currentLeader !== lastLeader){
-        confettiBurst();
-      }
-      lastLeader = currentLeader;
-
-      // Badge content without emojis
-      const medalBadge = (i)=>{
-        if(i===0) return '<span class="badge gold">1st</span>';
-        if(i===1) return '<span class="badge silver">2nd</span>';
-        if(i===2) return '<span class="badge bronze">3rd</span>';
-        return '';
-      };
-
-      // Build rows
+      const tbody=document.querySelector('#houseTable tbody');
+      const stats=document.getElementById('houseStats');
+      tbody.innerHTML='';stats.innerHTML='';
+      const data=rows.slice(1).map(r=>({house:r[0],points:+r[1]||0})).sort((a,b)=>b.points-a.points);
+      const leader=data[0]?.house;
+      if(lastLeader&&leader!==lastLeader)confettiBurst();
+      lastLeader=leader;
       data.forEach((r,i)=>{
-        const tr = document.createElement('tr');
-        tr.setAttribute('data-house', r.house);
-        tr.classList.add('enter');
-
-        if(i===0) tr.classList.add('medal-1');
-        else if(i===1) tr.classList.add('medal-2');
-        else if(i===2) tr.classList.add('medal-3');
-
-        tr.innerHTML = `
-          <td class="rank">${i+1}</td>
-          <td><span class="house-pill">${r.house}</span> ${medalBadge(i)}</td>
-          <td>${CAPTAINS[r.house] || "—"}</td>
-          <td>${formatNumber(r.points)}</td>`;
+        const tr=document.createElement('tr');
+        if(i===0)tr.classList.add('medal-1');
+        else if(i===1)tr.classList.add('medal-2');
+        else if(i===2)tr.classList.add('medal-3');
+        tr.innerHTML=`<td>${i+1}</td><td><span class="house-pill">${r.house}</span></td><td>${CAPTAINS[r.house]||"—"}</td><td>${formatNumber(r.points)}</td>`;
         tbody.appendChild(tr);
       });
-
-      // Stat cards (top 3)
       data.slice(0,3).forEach((r,i)=>{
-        const d = document.createElement('div');
+        const d=document.createElement('div');
         d.className='stat';
-        d.innerHTML = `
-          <div class="small muted">#${i+1} House</div>
-          <div style="font-weight:800; font-size:1.1rem">${r.house} ${medalBadge(i)}</div>
-          <div class="small muted">
-            ${formatNumber(r.points)} pts • Captain:<br>${CAPTAINS[r.house] || "—"}
-          </div>`;
+        if(i===0)d.style.background='linear-gradient(180deg, rgba(245,215,112,.18), rgba(245,215,112,.08))';
+        if(i===1)d.style.background='linear-gradient(180deg, rgba(207,215,230,.16), rgba(207,215,230,.06))';
+        if(i===2)d.style.background='linear-gradient(180deg, rgba(231,178,138,.16), rgba(231,178,138,.06))';
+        d.innerHTML=`<div style="color:#a7b3c2;font-size:.85rem;">#${i+1} House</div><div style="font-weight:800;font-size:1.1rem;">${r.house}</div><div style="color:#a7b3c2;font-size:.85rem;">${formatNumber(r.points)} pts • Captain:<br>${CAPTAINS[r.house]||"—"}</div>`;
         stats.appendChild(d);
       });
-
-      // FLIP animate rows based on previous positions
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(!prefersReduced && lastRowPositions && Object.keys(lastRowPositions).length){
-        const newRows = Array.from(document.querySelectorAll('#houseTable tbody tr'));
-        newRows.forEach(row=>{
-          const key = row.getAttribute('data-house');
-          const oldTop = lastRowPositions[key];
-          if(oldTop !== undefined){
-            const newTop = row.getBoundingClientRect().top;
-            const dy = oldTop - newTop;
-            if(Math.abs(dy) > 1){
-              row.style.transform = `translateY(${dy}px)`;
-              row.getBoundingClientRect(); // force reflow
-              row.style.transform = 'translateY(0)';
-            }
-          }
-          requestAnimationFrame(()=> row.classList.add('done'));
-        });
-      }else{
-        document.querySelectorAll('#houseTable tbody tr').forEach(r=>r.classList.add('done'));
-      }
     }
 
     function renderTop5(rows){
-      const tbody=document.querySelector('#top5Table tbody'); tbody.innerHTML=''; if(!rows.length) return;
+      const tbody=document.querySelector('#top5Table tbody');
+      tbody.innerHTML='';
       const data=rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0})).sort((a,b)=>b.points-a.points).slice(0,5);
-      data.forEach((r,i)=>{ 
-        const tr=document.createElement('tr'); 
-        tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`; 
-        tbody.appendChild(tr); 
-      });
-    }
-
-    function renderIndividuals(rows){
-      const tbody=document.querySelector('#indivTable tbody'); tbody.innerHTML=''; if(!rows.length) return;
-      const data=rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0})).sort((a,b)=>b.points-a.points);
-      data.forEach((r,i)=>{ 
-        const tr=document.createElement('tr'); 
-        tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`; 
-        tbody.appendChild(tr); 
+      data.forEach((r,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
       });
     }
 
     async function load(){
-      try{
-        const houseText=await fetchCSV(CONFIG.houseCSV); renderHouses(parseCSV(houseText));
-        const indivText=await fetchCSV(CONFIG.individualCSV); const rows=parseCSV(indivText); renderTop5(rows); renderIndividuals(rows);
-      }catch(err){
-        document.getElementById('houseError').textContent='House data error: '+err.message;
-        document.getElementById('indError').textContent='Individual data error: '+err.message;
-        document.getElementById('indTopError').textContent='Individual data error: '+err.message;
-      }
+      const houseText=await fetchCSV(CONFIG.houseCSV);
+      renderHouses(parseCSV(houseText));
+      const indivText=await fetchCSV(CONFIG.individualCSV);
+      renderTop5(parseCSV(indivText));
     }
     load(); setInterval(load,60000);
+
+    window.addEventListener('DOMContentLoaded',()=>document.getElementById('siteHeader').classList.add('header-animate'));
   </script>
 </body>
 </html>
