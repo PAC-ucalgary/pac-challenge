@@ -16,7 +16,6 @@
       --text:#e8eef5; --muted:#a7b3c2;
       --brand:#4cc9f0; --brand2:#a3f7bf;
       --shadow:0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.03) inset;
-
       --gold:#f5d770; --silver:#cfd7e6; --bronze:#e7b28a;
     }
 
@@ -25,28 +24,19 @@
     html, body { height: 100%; }
 
     body{
-      margin:0;
-      position: relative;
+      margin:0; position: relative;
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background: var(--bg);
+      color:var(--text); background: var(--bg);
       overflow-x: hidden;
     }
 
-    /* === Animated background canvas === */
+    /* Animated background layers */
     #bgCanvas{
-      position: fixed;
-      inset: 0;
-      width: 100vw; height: 100vh;
-      z-index: 0;
-      pointer-events: none;
+      position: fixed; inset: 0; width: 100vw; height: 100vh;
+      z-index: 0; pointer-events: none;
     }
-    /* Soft vignette so content pops */
     #vignette{
-      position: fixed;
-      inset: -20vmax;
-      z-index: 0;
-      pointer-events: none;
+      position: fixed; inset: -20vmax; z-index: 0; pointer-events: none;
       background:
         radial-gradient(60vmax 60vmax at 20% 10%, rgba(76,201,240,.10), transparent 60%),
         radial-gradient(70vmax 55vmax at 85% 80%, rgba(163,247,191,.08), transparent 65%),
@@ -55,13 +45,11 @@
     }
     @media (prefers-reduced-motion: reduce){
       #bgCanvas{ display:none; }
-      #vignette{ filter: none; }
+      #vignette{ filter:none; }
     }
 
     header, main, footer{ position: relative; z-index: 1; }
-
     a, a:visited{ color:inherit; text-decoration:none; }
-
     .container{width:min(1100px,92%); margin-inline:auto}
 
     header{
@@ -83,12 +71,9 @@
     .btn{
       display:inline-flex; align-items:center; gap:.6rem;
       padding:.7rem 1rem; border-radius:14px;
-      background: rgba(76,201,240,.14);
-      color: var(--text);
-      border:1px solid rgba(76,201,240,.35);
-      box-shadow: var(--shadow);
-      font-weight:700;
-      transition: background .2s ease, border-color .2s ease, transform .05s ease;
+      background: rgba(76,201,240,.14); color: var(--text);
+      border:1px solid rgba(76,201,240,.35); box-shadow: var(--shadow);
+      font-weight:700; transition: background .2s, border-color .2s, transform .05s;
     }
     .btn:hover{ background: rgba(76,201,240,.20); border-color: rgba(76,201,240,.45); }
     .btn:active{ transform: translateY(1px); }
@@ -101,8 +86,7 @@
       background: var(--panel);
       border:1px solid rgba(255,255,255,.06);
       border-radius:22px;
-      padding:20px;
-      box-shadow:var(--shadow);
+      padding:20px; box-shadow:var(--shadow);
       backdrop-filter: saturate(140%) blur(6px);
     }
     h1{font-size:clamp(28px,3vw,40px); margin:.2rem 0 1rem}
@@ -127,8 +111,6 @@
     .enter.done{ opacity:1; transform:translateY(0) }
 
     footer{padding:24px 0 48px; color:#a7b3c2; text-align:center}
-
-    /* Confetti always on top of bg, under UI */
     #confettiCanvas{position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:2;}
   </style>
 </head>
@@ -200,8 +182,7 @@
       challengeDocURL:"https://docs.google.com/document/d/1j3UUIg44EYJbwhgLaZoyTG-nD0Af_nuqWdvY7mDyT7g/edit?usp=sharing"
     };
     const CAPTAINS = {"Quds":"Mohammad Eldib","Gaza":"Ghassan Abuamsha","Qalqilya":"Nour Issa","Besan":"Besan Jadalowen"};
-    let lastLeader=null;
-    let lastRowPositions=null;
+    let lastLeader=null, lastRowPositions=null;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
@@ -212,7 +193,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('siteHeader').classList.add('header-animate');
-      initBackground(); // kick off animated bg
+      initBackground();
     });
 
     /* ==================== CSV + RENDER ==================== */
@@ -289,7 +270,6 @@
         stats.appendChild(d);
       });
 
-      // FLIP animate to smooth reordering
       if(!prefersReduced && lastRowPositions && Object.keys(lastRowPositions).length){
         const newRows=[...document.querySelectorAll('#houseTable tbody tr')];
         newRows.forEach(row=>{
@@ -300,7 +280,7 @@
             const dy=oldTop-newTop;
             if(Math.abs(dy)>1){
               row.style.transform=`translateY(${dy}px)`;
-              row.getBoundingClientRect(); // force reflow
+              row.getBoundingClientRect();
               row.style.transform='translateY(0)';
             }
           }
@@ -314,10 +294,8 @@
     function renderTop5(rows){
       const tbody=document.querySelector('#top5Table tbody');
       tbody.innerHTML='';
-      const data=rows.slice(1)
-        .map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
-        .sort((a,b)=>b.points-a.points)
-        .slice(0,5);
+      const data=rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
+        .sort((a,b)=>b.points-a.points).slice(0,5);
       data.forEach((r,i)=>{
         const tr=document.createElement('tr');
         tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
@@ -328,8 +306,7 @@
     function renderIndividuals(rows){
       const tbody=document.querySelector('#indivTable tbody');
       tbody.innerHTML='';
-      const data=rows.slice(1)
-        .map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
+      const data=rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
         .sort((a,b)=>b.points-a.points);
       data.forEach((r,i)=>{
         const tr=document.createElement('tr');
@@ -353,219 +330,198 @@
         document.getElementById('indTopError').textContent='Individual data error: '+err.message;
       }
     }
-
     load();
     setInterval(load, 60000);
 
-<script>
-  /* ==================== Animated Background ==================== */
-  function initBackground(){
-    if(prefersReduced) return;
+    /* ==================== Animated Background (orbs + stars + red triangle) ==================== */
+    function initBackground(){
+      if(prefersReduced) return;
 
-    const canvas = document.getElementById('bgCanvas');
-    const ctx = canvas.getContext('2d', { alpha: true });
-    let dpr = Math.max(1, window.devicePixelRatio || 1);
-    let w = 0, h = 0, rafId;
+      const canvas = document.getElementById('bgCanvas');
+      const ctx = canvas.getContext('2d', { alpha: true });
+      let dpr = Math.max(1, window.devicePixelRatio || 1);
+      let w = 0, h = 0, rafId;
 
-    // Floating glow "orbs"
-    const orbs = [];
-    const orbColors = ['#4cc9f0','#a3f7bf','#ffffff'];
-    const ORB_COUNT = 6;
+      const orbs = [];
+      const ORB_COUNT = 6;
 
-    // Twinkling stars
-    const stars = [];
-    const STAR_COUNT = Math.min(180, Math.floor(innerWidth * innerHeight / 15000));
+      const stars = [];
+      const STAR_COUNT = Math.min(180, Math.floor(innerWidth * innerHeight / 15000));
 
-    // 🔺 Glowing upside-down triangle (outline only)
-    const tri = {
-      cx: () => innerWidth * 0.5,
-      cy: () => innerHeight * 0.42,     // a bit above center so it sits behind the cards nicely
-      size: () => Math.min(innerWidth, innerHeight) * 0.62,
-      angle: 0,
-      spin: 0.0006,                      // slow, classy rotation
-      pulsePhase: 0,
-      dashOffset: 0
-    };
+      const tri = {
+        cx: () => innerWidth * 0.5,
+        cy: () => innerHeight * 0.42,
+        size: () => Math.min(innerWidth, innerHeight) * 0.62,
+        angle: 0, spin: 0.0006,
+        pulsePhase: 0, dashOffset: 0
+      };
 
-    function resize(){
-      dpr = Math.max(1, window.devicePixelRatio || 1);
-      w = Math.floor(innerWidth * dpr);
-      h = Math.floor(innerHeight * dpr);
-      canvas.width = w; canvas.height = h;
-      canvas.style.width = innerWidth + 'px';
-      canvas.style.height = innerHeight + 'px';
-      ctx.setTransform(1,0,0,1,0,0);
-      initStars();
-    }
-
-    function initOrbs(){
-      orbs.length = 0;
-      for(let i=0;i<ORB_COUNT;i++){
-        const r = (Math.random()*0.25 + 0.18) * Math.min(innerWidth, innerHeight);
-        const speed = (Math.random()*0.4 + 0.15) * (r/250);
-        orbs.push({
-          x: Math.random()*innerWidth,
-          y: Math.random()*innerHeight,
-          vx: (Math.random()*2-1)*speed,
-          vy: (Math.random()*2-1)*speed,
-          r,
-          c: orbColors[i%orbColors.length],
-          a: 0.10 + Math.random()*0.08
-        });
+      function resize(){
+        dpr = Math.max(1, window.devicePixelRatio || 1);
+        w = Math.floor(innerWidth * dpr);
+        h = Math.floor(innerHeight * dpr);
+        canvas.width = w; canvas.height = h;
+        canvas.style.width = innerWidth + 'px';
+        canvas.style.height = innerHeight + 'px';
+        ctx.setTransform(1,0,0,1,0,0);
+        initStars();
       }
-    }
 
-    function initStars(){
-      stars.length = 0;
-      const count = STAR_COUNT;
-      for(let i=0;i<count;i++){
-        stars.push({
-          x: Math.random()*w,
-          y: Math.random()*h,
-          r: Math.random()*1.8 + 0.6,
-          tw: Math.random()*Math.PI*2,
-          sp: 0.005 + Math.random()*0.01
-        });
-      }
-    }
-
-    function drawOrbs(){
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      for(const o of orbs){
-        const gx = o.x * dpr, gy = o.y * dpr, gr = o.r * dpr;
-        const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-        g.addColorStop(0, `rgba(76,201,240,${o.a})`);
-        g.addColorStop(1, `rgba(76,201,240,0)`);
-        if(o.c === '#a3f7bf'){
-          g.addColorStop(0, `rgba(163,247,191,${o.a})`);
+      function initOrbs(){
+        orbs.length = 0;
+        for(let i=0;i<ORB_COUNT;i++){
+          const r = (Math.random()*0.25 + 0.18) * Math.min(innerWidth, innerHeight);
+          const speed = (Math.random()*0.4 + 0.15) * (r/250);
+          orbs.push({
+            x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+            vx: (Math.random()*2-1)*speed, vy: (Math.random()*2-1)*speed,
+            r, a: 0.10 + Math.random()*0.08,
+            c: i%2 ? '#a3f7bf' : '#4cc9f0'
+          });
         }
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(gx, gy, gr, 0, Math.PI*2); ctx.fill();
       }
-      ctx.restore();
-    }
 
-    function updateOrbs(){
-      for(const o of orbs){
-        o.x += o.vx; o.y += o.vy;
-        if(o.x < -o.r) o.x = innerWidth + o.r;
-        if(o.x > innerWidth + o.r) o.x = -o.r;
-        if(o.y < -o.r) o.y = innerHeight + o.r;
-        if(o.y > innerHeight + o.r) o.y = -o.r;
+      function initStars(){
+        stars.length = 0;
+        for(let i=0;i<STAR_COUNT;i++){
+          stars.push({
+            x: Math.random()*w, y: Math.random()*h,
+            r: Math.random()*1.8 + 0.6,
+            tw: Math.random()*Math.PI*2, sp: 0.005 + Math.random()*0.01
+          });
+        }
       }
-    }
 
-    function drawStars(){
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = '#ffffff';
-      for(const s of stars){
-        s.tw += s.sp;
-        const alpha = 0.25 + 0.75 * (0.5 + Math.sin(s.tw)*0.5);
-        ctx.globalAlpha = alpha;
+      function drawOrbs(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        for(const o of orbs){
+          const gx = o.x * dpr, gy = o.y * dpr, gr = o.r * dpr;
+          const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
+          const base = (o.c === '#a3f7bf') ? '163,247,191' : '76,201,240';
+          g.addColorStop(0, `rgba(${base},${o.a})`);
+          g.addColorStop(1, `rgba(${base},0)`);
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(gx, gy, gr, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function updateOrbs(){
+        for(const o of orbs){
+          o.x += o.vx; o.y += o.vy;
+          if(o.x < -o.r) o.x = innerWidth + o.r;
+          if(o.x > innerWidth + o.r) o.x = -o.r;
+          if(o.y < -o.r) o.y = innerHeight + o.r;
+          if(o.y > innerHeight + o.r) o.y = -o.r;
+        }
+      }
+
+      function drawStars(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.fillStyle = '#ffffff';
+        for(const s of stars){
+          s.tw += s.sp;
+          const alpha = 0.25 + 0.75 * (0.5 + Math.sin(s.tw)*0.5);
+          ctx.globalAlpha = alpha;
+          ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function trianglePath(cx, cy, size){
+        const h = Math.sqrt(3)/2 * size;
+        const x1 = cx,           y1 = cy + h/2;   // bottom apex
+        const x2 = cx - size/2,  y2 = cy - h/2;   // top-left
+        const x3 = cx + size/2,  y3 = cy - h/2;   // top-right
         ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-        ctx.fill();
+        ctx.moveTo(x1*dpr, y1*dpr);
+        ctx.lineTo(x2*dpr, y2*dpr);
+        ctx.lineTo(x3*dpr, y3*dpr);
+        ctx.closePath();
       }
-      ctx.restore();
-    }
 
-    // 🔺 Triangle path helper (equilateral, pointing DOWN)
-    function trianglePath(cx, cy, size){
-      const h = Math.sqrt(3)/2 * size;         // height of equilateral
-      const x1 = cx;           const y1 = cy + h/2;   // bottom apex
-      const x2 = cx - size/2;  const y2 = cy - h/2;   // top-left
-      const x3 = cx + size/2;  const y3 = cy - h/2;   // top-right
-      ctx.beginPath();
-      ctx.moveTo(x1*dpr, y1*dpr);
-      ctx.lineTo(x2*dpr, y2*dpr);
-      ctx.lineTo(x3*dpr, y3*dpr);
-      ctx.closePath();
-    }
+      function drawTriangle(){
+        const pulse = 0.55 + 0.20*Math.sin(tri.pulsePhase);
+        const cx = tri.cx(), cy = tri.cy(), s = tri.size();
+        const hEq = Math.sqrt(3)/2 * s; // <-- FIX: define h here
 
-    function drawTriangle(t){
-      // Pulse between 0.35–0.75 opacity
-      const pulse = 0.55 + 0.20*Math.sin(tri.pulsePhase);
-      const cx = tri.cx(), cy = tri.cy(), s = tri.size();
+        ctx.save();
+        ctx.translate(cx*dpr, cy*dpr);
+        ctx.rotate(tri.angle);
+        ctx.translate(-cx*dpr, -cy*dpr);
 
-      ctx.save();
-      ctx.translate(cx*dpr, cy*dpr);
-      ctx.rotate(tri.angle);
-      ctx.translate(-cx*dpr, -cy*dpr);
+        // soft halo
+        ctx.save();
+        trianglePath(cx, cy, s*1.02);
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.lineWidth = 12*dpr;
+        ctx.strokeStyle = 'rgba(255, 59, 59, 0.12)';
+        ctx.shadowColor = 'rgba(255, 80, 80, 0.9)';
+        ctx.shadowBlur  = 40*dpr;
+        ctx.stroke();
+        ctx.restore();
 
-      // Outer soft halo
-      ctx.save();
-      trianglePath(cx, cy, s*1.02);
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.lineWidth = 12*dpr;
-      ctx.strokeStyle = 'rgba(255, 59, 59, 0.12)'; // soft red halo
-      ctx.shadowColor = 'rgba(255, 80, 80, 0.9)';
-      ctx.shadowBlur  = 40*dpr;
-      ctx.stroke();
-      ctx.restore();
+        // main red outline + shimmer
+        ctx.save();
+        trianglePath(cx, cy, s);
+        ctx.globalCompositeOperation = 'screen';
+        ctx.lineWidth = 3.5*dpr;
+        ctx.strokeStyle = `rgba(255, 59, 59, ${pulse})`;
+        ctx.shadowColor = 'rgba(255, 80, 80, 0.85)';
+        ctx.shadowBlur = 18*dpr;
+        ctx.setLineDash([16*dpr, 12*dpr]);
+        ctx.lineDashOffset = tri.dashOffset;
+        ctx.stroke();
+        ctx.restore();
 
-      // Main glowing stroke
-      ctx.save();
-      trianglePath(cx, cy, s);
-      ctx.globalCompositeOperation = 'screen';
-      ctx.lineWidth = 3.5*dpr;
-      ctx.strokeStyle = `rgba(255, 59, 59, ${pulse})`;
-      ctx.shadowColor = 'rgba(255, 80, 80, 0.85)';
-      ctx.shadowBlur = 18*dpr;
-      // Shimmering dash pass
-      ctx.setLineDash([16*dpr, 12*dpr]);
-      ctx.lineDashOffset = tri.dashOffset;
-      ctx.stroke();
-      ctx.restore();
+        // sweeping white shine
+        ctx.save();
+        trianglePath(cx, cy, s);
+        const grad = ctx.createLinearGradient((cx-s/2)*dpr, (cy+hEq/2)*dpr, (cx+s/2)*dpr, (cy-hEq/2)*dpr);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(0.5, 'rgba(255,255,255,0.35)');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.globalCompositeOperation = 'screen';
+        ctx.lineWidth = 1.2*dpr;
+        ctx.strokeStyle = grad;
+        ctx.setLineDash([22*dpr, 9999]);
+        ctx.lineDashOffset = -tri.dashOffset*1.2;
+        ctx.stroke();
+        ctx.restore();
 
-      // Bright specular "shine" that sweeps along the dash
-      ctx.save();
-      trianglePath(cx, cy, s);
-      const grad = ctx.createLinearGradient((cx-s/2)*dpr, (cy+h/2)*dpr, (cx+s/2)*dpr, (cy-h/2)*dpr);
-      grad.addColorStop(0, 'rgba(255,255,255,0)');
-      grad.addColorStop(0.5, 'rgba(255,255,255,0.35)');
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.globalCompositeOperation = 'screen';
-      ctx.lineWidth = 1.2*dpr;
-      ctx.strokeStyle = grad;
-      ctx.setLineDash([22*dpr, 9999]); // thin moving highlight
-      ctx.lineDashOffset = -tri.dashOffset*1.2;
-      ctx.stroke();
-      ctx.restore();
+        ctx.restore();
+      }
 
-      ctx.restore();
-    }
+      let lastTs = 0;
+      function tick(ts=0){
+        const dt = (ts - lastTs) || 16;
+        lastTs = ts;
 
-    let lastTs = 0;
-    function tick(ts=0){
-      const dt = (ts - lastTs) || 16; // ms
-      lastTs = ts;
+        tri.angle += tri.spin * dt;
+        tri.pulsePhase += 0.0032 * dt;
+        tri.dashOffset -= 0.06 * dt;
 
-      // Update tri animation
-      tri.angle += tri.spin * dt;
-      tri.pulsePhase += 0.0032 * dt;
-      tri.dashOffset -= 0.06 * dt;
+        ctx.clearRect(0,0,w,h);
+        drawStars();
+        drawTriangle();   // behind orbs
+        drawOrbs();
+        updateOrbs();
 
-      ctx.clearRect(0,0,w,h);
-      drawStars();
-      drawTriangle(ts);  // 🔺 draw behind orbs for depth
-      drawOrbs();
-      updateOrbs();
+        rafId = requestAnimationFrame(tick);
+      }
 
-      rafId = requestAnimationFrame(tick);
-    }
-
-    resize();
-    initOrbs();
-    tick();
-
-    window.addEventListener('resize', ()=>{
-      cancelAnimationFrame(rafId);
-      resize(); initOrbs();
+      resize();
+      initOrbs();
       tick();
-    }, { passive:true });
-  }
-</script>
+
+      window.addEventListener('resize', ()=>{
+        cancelAnimationFrame(rafId);
+        resize(); initOrbs();
+        tick();
+      }, { passive:true });
+    }
+  </script>
 </body>
 </html>
