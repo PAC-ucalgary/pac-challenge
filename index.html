@@ -1,3 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PAC Volunteer Challenge – Live Leaderboard</title>
+  <meta name="description" content="Live house rankings and challenge info for the PAC Volunteer Challenge." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel: rgba(17,24,35,.65);
+      --text:#e8eef5; --muted:#a7b3c2;
+      --brand:#4cc9f0; --brand2:#a3f7bf;
+      --shadow:0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.03) inset;
+
+      --gold:#f5d770; --silver:#cfd7e6; --bronze:#e7b28a;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    html, body { height: 100%; }
+
+    body{
+      margin:0;
+      position: relative;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background: var(--bg);
+      overflow-x: hidden;
+    }
+
+    /* === Animated background canvas === */
+    #bgCanvas{
+      position: fixed;
+      inset: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+    /* Soft vignette so content pops */
+    #vignette{
+      position: fixed;
+      inset: -20vmax;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(60vmax 60vmax at 20% 10%, rgba(76,201,240,.10), transparent 60%),
+        radial-gradient(70vmax 55vmax at 85% 80%, rgba(163,247,191,.08), transparent 65%),
+        linear-gradient(180deg, rgba(0,0,0,.15), transparent 40%, rgba(0,0,0,.25));
+      filter: blur(20px) saturate(120%);
+    }
+    @media (prefers-reduced-motion: reduce){
+      #bgCanvas{ display:none; }
+      #vignette{ filter: none; }
+    }
+
+    header, main, footer{ position: relative; z-index: 1; }
+
+    a, a:visited{ color:inherit; text-decoration:none; }
+
+    .container{width:min(1100px,92%); margin-inline:auto}
+
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter:saturate(150%) blur(8px);
+      background:linear-gradient(180deg, rgba(11,15,20,.75), rgba(11,15,20,.45));
+      border-bottom:1px solid rgba(255,255,255,.06);
+      opacity:.001; transform:translateY(-10px);
+    }
+    @keyframes fadeSlideDown { from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:translateY(0)} }
+    .header-animate{ animation:fadeSlideDown .7s ease-out forwards }
+
+    .nav{ display:flex; align-items:center; justify-content:space-between; padding:.9rem 0; gap:12px; }
+    .brand{ display:flex; align-items:center; gap:.55rem; font-weight:800; letter-spacing:.3px; }
+    .brand-logo{ width:55px; height:55px; object-fit:contain; border-radius:6px; filter:drop-shadow(0 1px 0 rgba(0,0,0,.2)) }
+    .chip{ display:inline-block; padding:.3rem .6rem; border-radius:999px; font-size:.75rem; color:#06121a; background:linear-gradient(110deg, var(--brand2), #7fe9d0) }
+    .links{display:flex; gap:1rem; flex-wrap:wrap}
+
+    .btn{
+      display:inline-flex; align-items:center; gap:.6rem;
+      padding:.7rem 1rem; border-radius:14px;
+      background: rgba(76,201,240,.14);
+      color: var(--text);
+      border:1px solid rgba(76,201,240,.35);
+      box-shadow: var(--shadow);
+      font-weight:700;
+      transition: background .2s ease, border-color .2s ease, transform .05s ease;
+    }
+    .btn:hover{ background: rgba(76,201,240,.20); border-color: rgba(76,201,240,.45); }
+    .btn:active{ transform: translateY(1px); }
+
+    main{padding:32px 0 64px}
+    .grid{display:grid; gap:20px}
+    @media(min-width:900px){ .grid{grid-template-columns:1.1fr .9fr} }
+
+    .card{
+      background: var(--panel);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px;
+      padding:20px;
+      box-shadow:var(--shadow);
+      backdrop-filter: saturate(140%) blur(6px);
+    }
+    h1{font-size:clamp(28px,3vw,40px); margin:.2rem 0 1rem}
+    h2{font-size:clamp(18px,2.2vw,24px); margin:.2rem 0 1rem}
+    p{color:var(--muted)}
+    table{width:100%; border-collapse:collapse; font-size:.95rem}
+    th, td{padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.06); text-align:left}
+    th{color:#cfe3f7}
+    tr:hover td{background:rgba(255,255,255,.03)}
+    .rank{font-weight:800}
+    .house-pill{display:inline-flex; align-items:center; gap:.5rem; padding:.3rem .6rem; border-radius:999px; background:rgba(76,201,240,.12); border:1px solid rgba(76,201,240,.3)}
+    .muted{color:var(--muted)} .small{font-size:.85rem}
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .stat{flex:1 1 140px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px}
+
+    .medal-1 td{ background:linear-gradient(180deg, rgba(245,215,112,.18), rgba(245,215,112,.08)); }
+    .medal-2 td{ background:linear-gradient(180deg, rgba(207,215,230,.16), rgba(207,215,230,.06)); }
+    .medal-3 td{ background:linear-gradient(180deg, rgba(231,178,138,.16), rgba(231,178,138,.06)); }
+
+    #houseTable tbody tr{ transition: transform .45s ease, opacity .45s ease; will-change: transform }
+    .enter{ opacity:0; transform:translateY(-6px) }
+    .enter.done{ opacity:1; transform:translateY(0) }
+
+    footer{padding:24px 0 48px; color:#a7b3c2; text-align:center}
+
+    /* Confetti always on top of bg, under UI */
+    #confettiCanvas{position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:2;}
+  </style>
+</head>
+<body>
+  <!-- Animated background -->
+  <canvas id="bgCanvas" aria-hidden="true"></canvas>
+  <div id="vignette" aria-hidden="true"></div>
+
+  <!-- Effects -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <header id="siteHeader">
+    <div class="container nav">
+      <a class="brand" href="./" aria-label="PAC Challenge home">
+        <img class="brand-logo" src="PAC Logo.svg" alt="PAC logo" />
+        <span>PAC Challenge</span>
+        <span class="chip">Live</span>
+      </a>
+      <div class="links">
+        <a class="btn" id="docLink" target="_blank" rel="noopener">Challenge Doc</a>
+        <a class="btn" id="fullBtn" href="#full-leaderboard">View Full Leaderboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+      <div class="card">
+        <h1>House Leaderboard</h1>
+        <p class="small muted">Live standings for the four houses. Keep completing challenges to push your team up the board.</p>
+        <div class="row" id="houseStats"></div>
+        <table id="houseTable" style="margin-top:12px">
+          <thead><tr><th>Rank</th><th>House</th><th>Captain</th><th>Total Points</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div id="houseError" class="error small"></div>
+      </div>
+
+      <div class="card">
+        <h2>Top 5 Individuals</h2>
+        <p class="small muted">Live ranking of volunteers based on approved points.</p>
+        <table id="top5Table">
+          <thead><tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div id="indTopError" class="error small"></div>
+      </div>
+    </section>
+
+    <section class="card" id="full-leaderboard" style="margin-top:20px">
+      <h2>Individual Leaderboard (Full)</h2>
+      <table id="indivTable">
+        <thead><tr><th>Rank</th><th>Name</th><th>House</th><th>Points</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div id="indError" class="error small"></div>
+    </section>
+  </main>
+
+  <footer>
+    Built for PAC by your team • Refreshes automatically • Privacy-safe (read-only)
+  </footer>
+
+  <script>
+    /* ==================== CONFIG ==================== */
+    const CONFIG = {
+      houseCSV:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=0&single=true&output=csv",
+      individualCSV:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=200435731&single=true&output=csv",
+      challengeDocURL:"https://docs.google.com/document/d/1j3UUIg44EYJbwhgLaZoyTG-nD0Af_nuqWdvY7mDyT7g/edit?usp=sharing"
+    };
+    const CAPTAINS = {"Quds":"Mohammad Eldib","Gaza":"Ghassan Abuamsha","Qalqilya":"Nour Issa","Besan":"Besan Jadalowen"};
+    let lastLeader=null;
+    let lastRowPositions=null;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
+    document.getElementById('fullBtn').addEventListener('click', (e)=>{
+      const el = document.querySelector('#full-leaderboard');
+      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('siteHeader').classList.add('header-animate');
+      initBackground(); // kick off animated bg
+    });
+
+    /* ==================== CSV + RENDER ==================== */
+    async function fetchCSV(url){ const res = await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); return await res.text(); }
+    function parseCSV(t){ return t.trim().split(/\r?\n/).map(r => r.split(',')); }
+    function formatNumber(n){ const x = Number(n); return isFinite(x) ? x.toLocaleString() : n; }
+
+    function measureRowPositions(){
+      const map = {};
+      document.querySelectorAll('#houseTable tbody tr').forEach(r=>{
+        const key = r.getAttribute('data-house');
+        if(!key) return;
+        map[key] = r.getBoundingClientRect().top;
+      });
+      return map;
+    }
+
+    function confettiBurst(){
+      if(prefersReduced) return;
+      const canvas=document.getElementById('confettiCanvas');
+      const ctx=canvas.getContext('2d');
+      const dpr=Math.max(window.devicePixelRatio||1,1);
+      canvas.width=Math.floor(innerWidth*dpr);
+      canvas.height=Math.floor(innerHeight*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      const colors=['#4cc9f0','#a3f7bf','#f5d770','#cfd7e6','#e7b28a','#ffffff'];
+      const N=140, parts=[];
+      for(let i=0;i<N;i++){
+        parts.push({x:innerWidth*0.5+(Math.random()-0.5)*80,y:-20+(Math.random()*20),vx:(Math.random()-0.5)*6,vy:2+Math.random()*3,g:0.15+Math.random()*0.2,w:6+Math.random()*6,h:10+Math.random()*8,r:Math.random()*Math.PI,spin:(Math.random()-0.5)*0.3,life:60+Math.random()*30,color:colors[Math.random()*colors.length|0]});
+      }
+      let rafId;
+      const tick=()=>{
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        parts.forEach(p=>{
+          p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.r+=p.spin; p.life--;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+        });
+        for(let i=parts.length-1;i>=0;i--) if(parts[i].life<=0 || parts[i].y>innerHeight+40) parts.splice(i,1);
+        if(parts.length>0) rafId=requestAnimationFrame(tick); else ctx.clearRect(0,0,canvas.width,canvas.height);
+      };
+      tick();
+      setTimeout(()=>cancelAnimationFrame(rafId), 2200);
+    }
+
+    function renderHouses(rows){
+      const tbody=document.querySelector('#houseTable tbody');
+      const stats=document.getElementById('houseStats');
+      lastRowPositions = measureRowPositions();
+      tbody.innerHTML=''; stats.innerHTML='';
+
+      const data=rows.slice(1).map(r=>({house:r[0],points:+r[1]||0})).sort((a,b)=>b.points-a.points);
+      const currentLeader = data[0]?.house || null;
+      if(lastLeader && currentLeader && currentLeader !== lastLeader){ confettiBurst(); }
+      lastLeader = currentLeader;
+
+      data.forEach((r,i)=>{
+        const tr=document.createElement('tr');
+        tr.setAttribute('data-house', r.house);
+        tr.classList.add('enter');
+        if(i===0) tr.classList.add('medal-1');
+        else if(i===1) tr.classList.add('medal-2');
+        else if(i===2) tr.classList.add('medal-3');
+        tr.innerHTML=`<td class="rank">${i+1}</td><td><span class="house-pill">${r.house}</span></td><td>${CAPTAINS[r.house]||"—"}</td><td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      data.slice(0,3).forEach((r,i)=>{
+        const d=document.createElement('div');
+        d.className='stat';
+        if(i===0)d.style.background='linear-gradient(180deg, rgba(245,215,112,.18), rgba(245,215,112,.08))';
+        if(i===1)d.style.background='linear-gradient(180deg, rgba(207,215,230,.16), rgba(207,215,230,.06))';
+        if(i===2)d.style.background='linear-gradient(180deg, rgba(231,178,138,.16), rgba(231,178,138,.06))';
+        d.innerHTML=`<div class="small muted">#${i+1} House</div><div style="font-weight:800;font-size:1.1rem">${r.house}</div><div class="small muted">${formatNumber(r.points)} pts • Captain:<br>${CAPTAINS[r.house]||"—"}</div>`;
+        stats.appendChild(d);
+      });
+
+      // FLIP animate to smooth reordering
+      if(!prefersReduced && lastRowPositions && Object.keys(lastRowPositions).length){
+        const newRows=[...document.querySelectorAll('#houseTable tbody tr')];
+        newRows.forEach(row=>{
+          const key=row.getAttribute('data-house');
+          const oldTop=lastRowPositions[key];
+          if(oldTop!==undefined){
+            const newTop=row.getBoundingClientRect().top;
+            const dy=oldTop-newTop;
+            if(Math.abs(dy)>1){
+              row.style.transform=`translateY(${dy}px)`;
+              row.getBoundingClientRect(); // force reflow
+              row.style.transform='translateY(0)';
+            }
+          }
+          requestAnimationFrame(()=>row.classList.add('done'));
+        });
+      }else{
+        document.querySelectorAll('#houseTable tbody tr').forEach(r=>r.classList.add('done'));
+      }
+    }
+
+    function renderTop5(rows){
+      const tbody=document.querySelector('#top5Table tbody');
+      tbody.innerHTML='';
+      const data=rows.slice(1)
+        .map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
+        .sort((a,b)=>b.points-a.points)
+        .slice(0,5);
+      data.forEach((r,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderIndividuals(rows){
+      const tbody=document.querySelector('#indivTable tbody');
+      tbody.innerHTML='';
+      const data=rows.slice(1)
+        .map(r=>({name:r[0],house:r[1],points:+r[2]||0}))
+        .sort((a,b)=>b.points-a.points);
+      data.forEach((r,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function load(){
+      try{
+        const houseText=await fetchCSV(CONFIG.houseCSV);
+        renderHouses(parseCSV(houseText));
+
+        const indivText=await fetchCSV(CONFIG.individualCSV);
+        const rows=parseCSV(indivText);
+        renderTop5(rows);
+        renderIndividuals(rows);
+      }catch(err){
+        document.getElementById('houseError').textContent='House data error: '+err.message;
+        document.getElementById('indError').textContent='Individual data error: '+err.message;
+        document.getElementById('indTopError').textContent='Individual data error: '+err.message;
+      }
+    }
+
+    load();
+    setInterval(load, 60000);
+
 <script>
   /* ==================== Animated Background ==================== */
   function initBackground(){
@@ -208,3 +567,5 @@
     }, { passive:true });
   }
 </script>
+</body>
+</html>
