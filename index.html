@@ -14,6 +14,11 @@
       --bg:#0b0f14; --panel:#111823; --text:#e8eef5; --muted:#a7b3c2;
       --brand:#4cc9f0; --brand2:#a3f7bf; --ring:rgba(76,201,240,.35);
       --shadow:0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.03) inset;
+
+      /* medal accents */
+      --gold:#f5d770; --gold-ink:#3a3000;
+      --silver:#cfd7e6; --silver-ink:#2c3240;
+      --bronze:#e7b28a; --bronze-ink:#3e2715;
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
@@ -30,7 +35,22 @@
     header{
       position:sticky; top:0; z-index:10; backdrop-filter:saturate(150%) blur(8px);
       background:linear-gradient(180deg, rgba(11,15,20,.85), rgba(11,15,20,.55));
-      border-bottom:1px solid rgba(255,255,255,.06)
+      border-bottom:1px solid rgba(255,255,255,.06);
+      /* initial state for entrance animation */
+      opacity:.001; transform:translateY(-10px);
+    }
+
+    /* header entrance animation */
+    @keyframes fadeSlideDown {
+      from { opacity:0; transform:translateY(-10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .header-animate {
+      animation: fadeSlideDown .7s ease-out forwards;
+    }
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .header-animate{ animation: none; opacity:1 !important; transform:none !important; }
     }
 
     /* Header nav */
@@ -90,6 +110,27 @@
     .stat{flex:1 1 140px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
       border-radius:16px; padding:14px}
 
+    /* medal styling for top 3 in the house table */
+    .medal-1 td{
+      background:linear-gradient(180deg, rgba(245,215,112,.18), rgba(245,215,112,.08));
+      border-bottom:1px solid rgba(245,215,112,.35);
+    }
+    .medal-2 td{
+      background:linear-gradient(180deg, rgba(207,215,230,.16), rgba(207,215,230,.06));
+      border-bottom:1px solid rgba(207,215,230,.35);
+    }
+    .medal-3 td{
+      background:linear-gradient(180deg, rgba(231,178,138,.16), rgba(231,178,138,.06));
+      border-bottom:1px solid rgba(231,178,138,.35);
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .55rem; border-radius:999px; font-size:.8rem; font-weight:800;
+      border:1px solid rgba(255,255,255,.1);
+    }
+    .badge.gold{ background:var(--gold); color:var(--gold-ink); }
+    .badge.silver{ background:var(--silver); color:var(--silver-ink); }
+    .badge.bronze{ background:var(--bronze); color:var(--bronze-ink); }
+
     footer{padding:24px 0 48px; color:var(--muted); text-align:center}
     .error{color:#ffb4b4}
     code.inline{background:rgba(255,255,255,.08); padding:.2rem .35rem; border-radius:6px}
@@ -123,7 +164,7 @@
   </style>
 </head>
 <body>
-  <header>
+  <header id="siteHeader">
     <div class="container nav">
       <a class="brand" href="./" aria-label="PAC Challenge home">
         <img class="brand-logo" src="PAC Logo.svg" alt="PAC logo" />
@@ -193,63 +234,93 @@
       individualCSV: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=200435731&single=true&output=csv",
       challengeDocURL: "https://docs.google.com/document/d/1j3UUIg44EYJbwhgLaZoyTG-nD0Af_nuqWdvY7mDyT7g/edit?usp=sharing"
     };
-    const CAPTAINS = { "Quds":"Mohammad Eldib", "Gaza":"Ghassan Abuamsha", "Qalqilya":"  Nour Issa", "Besan":" Besan Jadalowen" };
+    const CAPTAINS = { "Quds":"Mohammad Eldib", "Gaza":"Ghassan Abuamsha", "Qalqilya":"Nour Issa", "Besan":"Besan Jadalowen" };
 
+    // Smooth jump to full leaderboard
     document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
     document.getElementById('fullBtn').addEventListener('click', (e)=>{
       const el = document.querySelector('#full-leaderboard');
       if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
     });
 
+    // Header entrance animation on first paint
+    window.addEventListener('DOMContentLoaded', () => {
+      const h = document.getElementById('siteHeader');
+      // small delay so it feels natural
+      requestAnimationFrame(()=>{ h.classList.add('header-animate'); });
+    });
+
     async function fetchCSV(url){ const res = await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); return await res.text(); }
     function parseCSV(t){ return t.trim().split(/\r?\n/).map(r => r.split(',')); }
     function formatNumber(n){ const x = Number(n); return isFinite(x) ? x.toLocaleString() : n; }
-// --- houses ---
-function renderHouses(rows){
-  const tbody = document.querySelector('#houseTable tbody');
-  const stats = document.getElementById('houseStats');
-  tbody.innerHTML = ''; 
-  stats.innerHTML = '';
 
-  const data = rows.slice(1).map(r => ({
-    house: r[0],
-    points: +r[1] || 0
-  })).sort((a,b)=>b.points-a.points);
+    // --- houses ---
+    function renderHouses(rows){
+      const tbody = document.querySelector('#houseTable tbody');
+      const stats = document.getElementById('houseStats');
+      tbody.innerHTML = ''; 
+      stats.innerHTML = '';
 
-  // Table rows
-  data.forEach((r,i)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="rank">${i+1}</td>
-      <td><span class="house-pill">${r.house}</span></td>
-      <td>${CAPTAINS[r.house] || "—"}</td>
-      <td>${formatNumber(r.points)}</td>`;
-    tbody.appendChild(tr);
-  });
+      const data = rows.slice(1).map(r => ({
+        house: r[0],
+        points: +r[1] || 0
+      })).sort((a,b)=>b.points-a.points);
 
-  // Stat cards for top 3 houses
-  data.slice(0,3).forEach((r,i)=>{
-    const d = document.createElement('div');
-    d.className='stat';
-    d.innerHTML = `
-      <div class="small muted">#${i+1} House</div>
-      <div style="font-weight:800; font-size:1.1rem">${r.house}</div>
-      <div class="small muted">
-        ${formatNumber(r.points)} pts • Captain:<br>${CAPTAINS[r.house] || "—"}
-      </div>`;
-    stats.appendChild(d);
-  });
-}
+      // helper for medal label
+      const medalBadge = (i)=>{
+        if(i===0) return '<span class="badge gold">🥇 1st</span>';
+        if(i===1) return '<span class="badge silver">🥈 2nd</span>';
+        if(i===2) return '<span class="badge bronze">🥉 3rd</span>';
+        return '';
+      };
+
+      // Table rows (with medal highlighting)
+      data.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        if(i===0) tr.classList.add('medal-1');
+        else if(i===1) tr.classList.add('medal-2');
+        else if(i===2) tr.classList.add('medal-3');
+
+        tr.innerHTML = `
+          <td class="rank">${i+1}</td>
+          <td><span class="house-pill">${r.house}</span> ${medalBadge(i)}</td>
+          <td>${CAPTAINS[r.house] || "—"}</td>
+          <td>${formatNumber(r.points)}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      // Stat cards for top 3 houses (with badges)
+      data.slice(0,3).forEach((r,i)=>{
+        const d = document.createElement('div');
+        d.className='stat';
+        d.innerHTML = `
+          <div class="small muted">#${i+1} House</div>
+          <div style="font-weight:800; font-size:1.1rem">${r.house} ${medalBadge(i)}</div>
+          <div class="small muted">
+            ${formatNumber(r.points)} pts • Captain:<br>${CAPTAINS[r.house] || "—"}
+          </div>`;
+        stats.appendChild(d);
+      });
+    }
 
     function renderTop5(rows){
       const tbody=document.querySelector('#top5Table tbody'); tbody.innerHTML=''; if(!rows.length) return;
       const data=rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0})).sort((a,b)=>b.points-a.points).slice(0,5);
-      data.forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`; tbody.appendChild(tr); });
+      data.forEach((r,i)=>{ 
+        const tr=document.createElement('tr'); 
+        tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`; 
+        tbody.appendChild(tr); 
+      });
     }
+
     function renderIndividuals(rows){
       const tbody=document.querySelector('#indivTable tbody'); tbody.innerHTML=''; if(!rows.length) return;
       const data=rows.slice(1).map(r=>({name:r[0],house:r[1],points:+r[2]||0})).sort((a,b)=>b.points-a.points);
-      data.forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`; tbody.appendChild(tr); });
+      data.forEach((r,i)=>{ 
+        const tr=document.createElement('tr'); 
+        tr.innerHTML=`<td class="rank">${i+1}</td><td>${r.name}</td><td>${r.house}</td><td>${formatNumber(r.points)}</td>`; 
+        tbody.appendChild(tr); 
+      });
     }
 
     async function load(){
