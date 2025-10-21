@@ -22,35 +22,39 @@
 
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
+html, body { height: 100%; }
+
 body{
   margin:0;
+  position: relative;          /* ← add */
   font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   color:var(--text);
   background: var(--bg);
+  overflow-x: hidden;          /* avoids tiny scrollbars during animation */
 }
 
-/* Subtle moving glow background */
+
 body::before{
   content:"";
   position:fixed;
-  inset:-25vmax;                 /* extend beyond edges to hide movement */
+  top:-25vmax; left:-25vmax; right:-25vmax; bottom:-25vmax; /* more compatible than inset on some browsers */
   pointer-events:none;
-  z-index:-1;
+  z-index:0;                                /* ← was -1; now sits ABOVE body bg, BELOW content */
   background:
     radial-gradient(40vmax 28vmax at 75% 0%,  rgba(76,201,240,.16), transparent 60%),
     radial-gradient(36vmax 24vmax at 0% 20%,   rgba(163,247,191,.13), transparent 60%),
     radial-gradient(48vmax 32vmax at 110% 95%, rgba(76,201,240,.10), transparent 65%);
   filter: blur(30px) saturate(120%);
-  animation: driftGlow 22s ease-in-out infinite alternate;
+  will-change: transform;                   /* smoother on Safari/Firefox */
+  animation: driftGlow 28s ease-in-out infinite alternate;
 }
 
 @keyframes driftGlow{
-  0%   { transform: translate3d(-2%, -1%, 0) rotate(0deg);   }
-  50%  { transform: translate3d( 2%,  1%, 0) rotate(3deg);   }
-  100% { transform: translate3d(-1%,  2%, 0) rotate(-2deg);  }
+  0%   { transform: translate3d(-2%, -1%, 0) rotate(0deg); }
+  50%  { transform: translate3d( 2%,  1%, 0) rotate(3deg); }
+  100% { transform: translate3d(-1%,  2%, 0) rotate(-2deg); }
 }
 
-/* Respect reduced motion */
 @media (prefers-reduced-motion: reduce){
   body::before{ animation:none; }
 }
