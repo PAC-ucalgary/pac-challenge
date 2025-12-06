@@ -112,6 +112,11 @@
 
     footer{padding:24px 0 48px; color:#a7b3c2; text-align:center}
     #confettiCanvas{position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:2;}
+
+    /* digits line up in countdown */
+    #countdownTimer{
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
 <body>
@@ -135,6 +140,21 @@
       </div>
     </div>
   </header>
+
+  <!-- 👇 NEW: COUNTDOWN CARD GOES RIGHT AFTER HEADER -->
+  <section class="container" id="countdownWrap" style="margin:18px auto 0">
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <div>
+        <div class="small muted">Countdown to Winner Reveal</div>
+        <h2 style="margin:.2rem 0 0">Winner announced at 12:00 AM • Dec 6</h2>
+      </div>
+      <div id="countdownTimer"
+           style="font-weight:800;font-size:clamp(18px,3.4vw,28px);letter-spacing:.5px;">
+        --:--:--
+      </div>
+    </div>
+  </section>
+  <!-- 👆 END COUNTDOWN CARD -->
 
   <main class="container">
     <section class="grid">
@@ -174,6 +194,21 @@
     Built for PAC by your team • Refreshes automatically • Privacy-safe (read-only)
   </footer>
 
+  <!-- 👇 NEW: WINNER MODAL GOES JUST BEFORE </body> -->
+  <div id="winnerModal"
+       style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+              background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:30;">
+    <div class="card"
+         style="max-width:680px;width:min(92%,680px);text-align:center;padding:28px 22px;">
+      <div class="small muted" style="margin-bottom:6px;">PAC Challenge</div>
+      <h2 id="winnerTitle"
+          style="font-size:clamp(22px,3vw,30px);margin:.1rem 0 10px;">We have a winner!</h2>
+      <p id="winnerSubtitle" style="font-size:clamp(16px,2.2vw,18px);"></p>
+      <button id="winnerClose" class="btn" style="margin-top:14px;">Close</button>
+    </div>
+  </div>
+  <!-- 👆 END WINNER MODAL -->
+
   <script>
     /* ==================== CONFIG ==================== */
     const CONFIG = {
@@ -181,9 +216,15 @@
       individualCSV:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTGaBgr7vEI6G3w3900q0_Xr9JWRXm_3aLuP9ZXMTfmPNxU9pPJcptRft_XNLAFHip-QLzZlyEEIMNs/pub?gid=200435731&single=true&output=csv",
       challengeDocURL:"https://docs.google.com/document/d/1j3UUIg44EYJbwhgLaZoyTG-nD0Af_nuqWdvY7mDyT7g/edit?usp=sharing"
     };
+
     const CAPTAINS = {"Quds":"Mohammad Eldib","Gaza":"Ghassan Abuamsha","Qalqilya":"Nour Issa","Besan":"Besan Jadalowen"};
     let lastLeader=null, lastRowPositions=null;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // 👇 NEW: manual winner + reveal time
+    const WINNER_HOUSE = "-";                 // <<< CHANGE THIS TO THE REAL WINNER
+    const WINNER_TIME  = new Date('2025-12-06T00:00:00'); // midnight local on Dec 6
+    let winnerShown = false;
 
     document.getElementById('docLink').href = CONFIG.challengeDocURL || "#";
     document.getElementById('fullBtn').addEventListener('click', (e)=>{
@@ -331,165 +372,222 @@
       }
     }
     load();
-    setInterval(load, 60000);
+    const REFRESH_ID = setInterval(load, 60000);   // 👈 changed so we can clear later
 
-    /* ==================== Animated Background (orbs + stars + red triangle) ==================== */
- function initBackground(){
-  if(prefersReduced) return;
+    /* ==================== Animated Background (static triangle + orbs + stars) ==================== */
+    function initBackground(){
+      if(prefersReduced) return;
 
-  const canvas = document.getElementById('bgCanvas');
-  const ctx = canvas.getContext('2d', { alpha: true });
-  let dpr = Math.max(1, window.devicePixelRatio || 1);
-  let w = 0, h = 0, rafId;
+      const canvas = document.getElementById('bgCanvas');
+      const ctx = canvas.getContext('2d', { alpha: true });
+      let dpr = Math.max(1, window.devicePixelRatio || 1);
+      let w = 0, h = 0, rafId;
 
-  // ---- tweakables for the triangle look ----
-  const TRI_OPACITY   = 0.18;   // outline transparency (lower = lighter)
-  const TRI_LINEWIDTH = 3.5;    // outline thickness (px, scaled by dpr)
-  const HALO_ALPHA    = 0.10;   // soft outer glow
-  const HALO_BLUR     = 36;     // glow blur radius (px, scaled by dpr)
-  const TRI_SCALE     = 0.62;   // relative size vs viewport min dimension
-  // ------------------------------------------
+      const orbs = [];
+      const ORB_COUNT = 6;
 
-  // Floating orbs + stars (unchanged)
-  const orbs = [];
-  const ORB_COUNT = 6;
-  const stars = [];
-  const STAR_COUNT = Math.min(180, Math.floor(innerWidth * innerHeight / 15000));
+      const stars = [];
+      const STAR_COUNT = Math.min(180, Math.floor(innerWidth * innerHeight / 15000));
 
-  // 🔺 Centered, static, upside-down triangle
-  const tri = {
-    cx: () => innerWidth * 0.5,
-    cy: () => innerHeight * 0.5,          // exactly centered vertically now
-    size: () => Math.min(innerWidth, innerHeight) * TRI_SCALE
-  };
+      const TRI_OPACITY   = 0.18;
+      const TRI_LINEWIDTH = 3.5;
+      const HALO_ALPHA    = 0.10;
+      const HALO_BLUR     = 36;
+      const TRI_SCALE     = 0.62;
 
-  function resize(){
-    dpr = Math.max(1, window.devicePixelRatio || 1);
-    w = Math.floor(innerWidth * dpr);
-    h = Math.floor(innerHeight * dpr);
-    canvas.width = w; canvas.height = h;
-    canvas.style.width = innerWidth + 'px';
-    canvas.style.height = innerHeight + 'px';
-    ctx.setTransform(1,0,0,1,0,0);
-    initStars();
-  }
+      const tri = {
+        cx: () => innerWidth * 0.5,
+        cy: () => innerHeight * 0.5,
+        size: () => Math.min(innerWidth, innerHeight) * TRI_SCALE
+      };
 
-  function initOrbs(){
-    orbs.length = 0;
-    for(let i=0;i<ORB_COUNT;i++){
-      const r = (Math.random()*0.25 + 0.18) * Math.min(innerWidth, innerHeight);
-      const speed = (Math.random()*0.4 + 0.15) * (r/250);
-      orbs.push({
-        x: Math.random()*innerWidth, y: Math.random()*innerHeight,
-        vx: (Math.random()*2-1)*speed, vy: (Math.random()*2-1)*speed,
-        r, a: 0.10 + Math.random()*0.08,
-        c: i%2 ? '#a3f7bf' : '#4cc9f0'
-      });
+      function resize(){
+        dpr = Math.max(1, window.devicePixelRatio || 1);
+        w = Math.floor(innerWidth * dpr);
+        h = Math.floor(innerHeight * dpr);
+        canvas.width = w; canvas.height = h;
+        canvas.style.width = innerWidth + 'px';
+        canvas.style.height = innerHeight + 'px';
+        ctx.setTransform(1,0,0,1,0,0);
+        initStars();
+      }
+
+      function initOrbs(){
+        orbs.length = 0;
+        for(let i=0;i<ORB_COUNT;i++){
+          const r = (Math.random()*0.25 + 0.18) * Math.min(innerWidth, innerHeight);
+          const speed = (Math.random()*0.4 + 0.15) * (r/250);
+          orbs.push({
+            x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+            vx: (Math.random()*2-1)*speed, vy: (Math.random()*2-1)*speed,
+            r, a: 0.10 + Math.random()*0.08,
+            c: i%2 ? '#a3f7bf' : '#4cc9f0'
+          });
+        }
+      }
+
+      function initStars(){
+        stars.length = 0;
+        for(let i=0;i<STAR_COUNT;i++){
+          stars.push({ x: Math.random()*w, y: Math.random()*h,
+            r: Math.random()*1.8 + 0.6, tw: Math.random()*Math.PI*2,
+            sp: 0.005 + Math.random()*0.01 });
+        }
+      }
+
+      function drawOrbs(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        for(const o of orbs){
+          const gx = o.x * dpr, gy = o.y * dpr, gr = o.r * dpr;
+          const base = (o.c === '#a3f7bf') ? '163,247,191' : '76,201,240';
+          const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
+          g.addColorStop(0, `rgba(${base},${o.a})`);
+          g.addColorStop(1, `rgba(${base},0)`);
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(gx, gy, gr, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function updateOrbs(){
+        for(const o of orbs){
+          o.x += o.vx; o.y += o.vy;
+          if(o.x < -o.r) o.x = innerWidth + o.r;
+          if(o.x > innerWidth + o.r) o.x = -o.r;
+          if(o.y < -o.r) o.y = innerHeight + o.r;
+          if(o.y > innerHeight + o.r) o.y = -o.r;
+        }
+      }
+
+      function drawStars(){
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.fillStyle = '#ffffff';
+        for(const s of stars){
+          s.tw += s.sp;
+          const alpha = 0.25 + 0.75 * (0.5 + Math.sin(s.tw)*0.5);
+          ctx.globalAlpha = alpha;
+          ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function trianglePath(cx, cy, size){
+        const hEq = Math.sqrt(3)/2 * size;
+        const x1 = cx,           y1 = cy + hEq/2;
+        const x2 = cx - size/2,  y2 = cy - hEq/2;
+        const x3 = cx + size/2,  y3 = cy - hEq/2;
+        ctx.beginPath();
+        ctx.moveTo(x1*dpr, y1*dpr);
+        ctx.lineTo(x2*dpr, y2*dpr);
+        ctx.lineTo(x3*dpr, y3*dpr);
+        ctx.closePath();
+      }
+
+      function drawTriangle(){
+        const cx = tri.cx(), cy = tri.cy(), s = tri.size();
+
+        ctx.save();
+        // halo
+        ctx.save();
+        trianglePath(cx, cy, s*1.02);
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.lineWidth = (TRI_LINEWIDTH*3) * dpr;
+        ctx.strokeStyle = `rgba(255,59,59,${HALO_ALPHA})`;
+        ctx.shadowColor = 'rgba(255,80,80,0.85)';
+        ctx.shadowBlur  = HALO_BLUR * dpr;
+        ctx.stroke();
+        ctx.restore();
+
+        // outline
+        ctx.save();
+        trianglePath(cx, cy, s);
+        ctx.globalCompositeOperation = 'screen';
+        ctx.lineWidth = TRI_LINEWIDTH * dpr;
+        ctx.strokeStyle = `rgba(255,59,59,${TRI_OPACITY})`;
+        ctx.shadowColor = 'rgba(255,80,80,0.5)';
+        ctx.shadowBlur  = 10 * dpr;
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      function tick(){
+        ctx.clearRect(0,0,w,h);
+        drawStars();
+        drawTriangle();
+        drawOrbs();
+        updateOrbs();
+        rafId = requestAnimationFrame(tick);
+      }
+
+      resize();
+      initOrbs();
+      tick();
+
+      window.addEventListener('resize', ()=>{
+        cancelAnimationFrame(rafId);
+        resize(); initOrbs();
+        tick();
+      }, { passive:true });
     }
-  }
 
-  function initStars(){
-    stars.length = 0;
-    for(let i=0;i<STAR_COUNT;i++){
-      stars.push({ x: Math.random()*w, y: Math.random()*h,
-        r: Math.random()*1.8 + 0.6, tw: Math.random()*Math.PI*2,
-        sp: 0.005 + Math.random()*0.01 });
+    /* ==================== COUNTDOWN + WINNER REVEAL ==================== */
+    function two(n){ return n.toString().padStart(2,'0'); }
+
+    function updateCountdown(){
+      const el = document.getElementById('countdownTimer');
+      if(!el) return;
+      const now = new Date();
+      const diff = WINNER_TIME - now;
+
+      // Time’s up
+      if(diff <= 0){
+        el.textContent = "00:00:00";
+        if(!winnerShown){
+          showWinnerModal();
+        }
+        return;
+      }
+
+      const totalSec = Math.floor(diff / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      el.textContent = `${two(h)}:${two(m)}:${two(s)}`;
     }
-  }
 
-  function drawOrbs(){
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    for(const o of orbs){
-      const gx = o.x * dpr, gy = o.y * dpr, gr = o.r * dpr;
-      const base = (o.c === '#a3f7bf') ? '163,247,191' : '76,201,240';
-      const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-      g.addColorStop(0, `rgba(${base},${o.a})`);
-      g.addColorStop(1, `rgba(${base},0)`);
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(gx, gy, gr, 0, Math.PI*2); ctx.fill();
+    function showWinnerModal(){
+      winnerShown = true;
+      try { clearInterval(REFRESH_ID); } catch(e) {}
+
+      // Confetti celebration
+      confettiBurst();
+      setTimeout(confettiBurst, 800);
+      setTimeout(confettiBurst, 1600);
+
+      const modal = document.getElementById('winnerModal');
+      const titleEl = document.getElementById('winnerTitle');
+      const subEl   = document.getElementById('winnerSubtitle');
+
+      titleEl.textContent = `🏆 Winner: ${WINNER_HOUSE}`;
+      subEl.textContent   = `${WINNER_HOUSE} has won the PAC Volunteer Challenge!`;
+
+      modal.style.display = 'flex';
     }
-    ctx.restore();
-  }
-  function updateOrbs(){
-    for(const o of orbs){
-      o.x += o.vx; o.y += o.vy;
-      if(o.x < -o.r) o.x = innerWidth + o.r;
-      if(o.x > innerWidth + o.r) o.x = -o.r;
-      if(o.y < -o.r) o.y = innerHeight + o.r;
-      if(o.y > innerHeight + o.r) o.y = -o.r;
+
+    document.getElementById('winnerClose').addEventListener('click', () => {
+      document.getElementById('winnerModal').style.display = 'none';
+    });
+
+    // Start countdown ticking
+    updateCountdown();
+    const COUNTDOWN_ID = setInterval(updateCountdown, 1000);
+    if(Date.now() >= WINNER_TIME.getTime()){
+      showWinnerModal();
     }
-  }
-  function drawStars(){
-    ctx.save();
-    ctx.globalCompositeOperation = 'screen';
-    ctx.fillStyle = '#ffffff';
-    for(const s of stars){
-      s.tw += s.sp;
-      const alpha = 0.25 + 0.75 * (0.5 + Math.sin(s.tw)*0.5);
-      ctx.globalAlpha = alpha;
-      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  function trianglePath(cx, cy, size){
-    const hEq = Math.sqrt(3)/2 * size;     // equilateral height
-    const x1 = cx,           y1 = cy + hEq/2;   // bottom apex
-    const x2 = cx - size/2,  y2 = cy - hEq/2;   // top-left
-    const x3 = cx + size/2,  y3 = cy - hEq/2;   // top-right
-    ctx.beginPath();
-    ctx.moveTo(x1*dpr, y1*dpr);
-    ctx.lineTo(x2*dpr, y2*dpr);
-    ctx.lineTo(x3*dpr, y3*dpr);
-    ctx.closePath();
-  }
-
-  function drawTriangle(){
-    const cx = tri.cx(), cy = tri.cy(), s = tri.size();
-
-    // soft outer halo
-    ctx.save();
-    trianglePath(cx, cy, s*1.02);
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.lineWidth = (TRI_LINEWIDTH*3) * dpr;
-    ctx.strokeStyle = `rgba(255,59,59,${HALO_ALPHA})`;
-    ctx.shadowColor = 'rgba(255,80,80,0.85)';
-    ctx.shadowBlur  = HALO_BLUR * dpr;
-    ctx.stroke();
-    ctx.restore();
-
-    // main outline (no spin, no pulse, no dash)
-    ctx.save();
-    trianglePath(cx, cy, s);
-    ctx.globalCompositeOperation = 'screen';
-    ctx.lineWidth = TRI_LINEWIDTH * dpr;
-    ctx.strokeStyle = `rgba(255,59,59,${TRI_OPACITY})`;
-    ctx.shadowColor = 'rgba(255,80,80,0.5)';
-    ctx.shadowBlur  = 10 * dpr;
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function tick(){
-    ctx.clearRect(0,0,w,h);
-    drawStars();
-    drawTriangle();     // centered + static
-    drawOrbs();
-    updateOrbs();
-    rafId = requestAnimationFrame(tick);
-  }
-
-  resize();
-  initOrbs();
-  tick();
-
-  window.addEventListener('resize', ()=>{
-    cancelAnimationFrame(rafId);
-    resize(); initOrbs();
-    tick();
-  }, { passive:true });
-}
-</script>
+  </script>
 </body>
 </html>
